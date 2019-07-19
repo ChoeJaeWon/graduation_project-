@@ -11,3 +11,4 @@
 -File Information
 module.py: header file. It has define value and model(fc, conv, lstm, adloss) function
 conv.py: 2.CONV file. It is constructed by CONV+FC
+
