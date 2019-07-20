@@ -1,20 +1,21 @@
 '''
 ----------------------------코드 설명----------------------------
 -C-
-3.LSTM에 해당하는 코드로
-LSTM으로 구현함
+4.CONV+LSTM에 해당하는 코드로
+CONV + LSTM으로 구현함
 ----------------------------고려 사항----------------------------
-lstm은 input x에 이미 exogenous가 포함되어있다.
-하지만 conv_lstm구현시 따로 받아야함으로 preprocess를 수정해야 한다
-수정사항
-1. exogenous도 lstm버전이 있어야한다.(즉 CELL_SIZE 따라 반복 되어야함)
-2. 기존의 lstm버전은 speed만 고려해야한다.(vector를 66개 -> 12개로 수정)
+
 '''
 from module import *
 
-#LSTM을 구현
-def model(X, E, Y):
-    layer = LSTM_model(X, E)
+#CONV+LSTM을 구현
+def model(C, E, Y):
+    for idx in range(CELL_SIZE):
+        if idx == 0:
+            layer = tf.reshape(CNN_model(C[idx]), [1, BATCH_SIZE, TIME_STAMP])
+        else:
+            layer = tf.concat(layer, tf.reshape(CNN_model(C[idx], [1, BATCH_SIZE, TIME_STAMP]), axis=0))
+    layer = LSTM_model(layer, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
@@ -30,7 +31,7 @@ def train(X_data, E_data, Y_data, cost_MSE, optimal, train_idx):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
-            X_train = batch_slice(X_data, train_idx, ba_idx, 'LSTM', 1)
+            X_train = batch_slice(X_data, train_idx, ba_idx, 'LSTM', CELL_SIZE)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
@@ -52,7 +53,7 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         # Batch Slice
-        X_test = batch_slice(X_data, test_idx, ba_idx, 'LSTM', 1)
+        X_test = batch_slice(X_data, test_idx, ba_idx, 'LSTM', CELL_SIZE)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
 

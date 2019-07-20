@@ -1,11 +1,22 @@
 '''
+----------------------------코드 설명----------------------------
+-C-
 module 파일: 헤더 파일
 구성 요소
 각종 hyper parameter
 
+----------------------------고려 사항----------------------------
 *2019 07 05
 upStream_num, downStream_num은 데이터를 만들때 고려해서 실험 해줘야함
 그래서 mu, md 라는 변수를 만들긴 하지만 나중에 파일에서 읽어와야함
+*2019 07 20
+과연 lstm을 미리 preprocess하는것이 효과가 있을까 그냥 fully data에서 받아와서 사용하는것이 더 효율적이지 않을까
+input_data에서 안사용하는 데이터도 모두 받아와야하는데 이를 조건문으로 바꿔줄 필요가있다.
+*2019 07 21
+conv의 filter size와 layer등의 default값을 정해주어야 한다.
+
+각각의 module이 batch를 제대로 반영하고 있는지 확인해야함
+
 '''
 
 import tensorflow as tf
@@ -17,11 +28,10 @@ np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준
 
 #Setting
 #File name
-FILEX_FC = '' #fc data 파일 이름(X 데이터)
-FILEX_CONV = '' #preprocessing한 conv data 파일 이름(X 데이터)
-FILEX_LSTM = '' #preprocessing한 lstm data 파일 이름(X 데이터)
-FILE_EXO = '' #exogenous(data 8)만 잘라낸 파일 이름
-FILEY = '' #y data 파일 이름
+FILEX_SPEED = '' #speed만 잘라낸 파일 이름(X data)
+FILEX_EXO = '' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_CONV = '' #preprocessing한 conv data 파일 이름(X data)
+FILEY = '' #beta분 후 speed 파일 이름(Y data)
 
 #variable
 TRAIN_NUM = 1000#traing 회수
@@ -57,7 +67,7 @@ HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 VECTOR_SIZE = 66 #lstm하나의 cell에 들어가는 vector의 크기 [default 66]
-TIME_STAMP = 12 #vector에서 고려해주는 시간
+TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간
 
 
 
@@ -105,12 +115,11 @@ def fileToData(fileName):
 
 
 #input data를 만들어줌
-def input_data():
+def input_data(type):
     #file을 numpy로 바꿔줌
-    fcX_data = fileToData(FILEX_FC) #전체 fc 데이터(speed + exogenous)
-    convX_data = fileToData(FILEX_CONV) #전체 conv 데이터
-    lstmX_data = fileToData(FILEX_LSTM) #전체 lstm 데이터
-    E_data = fileToData(FILE_EXO) #외부요소만 자른 데이터
+    S_data = fileToData(FILEX_SPEED) #only speed 데이터(시간순)
+    C_data = fileToData(FILEX_CONV) #conv 데이터(행(공간), 열(시간))
+    E_data = fileToData(FILEX_EXO)  # 외부요소만 자른 데이터
     Y_data = fileToData(FILEY) #실재값 데이터
 
 
@@ -120,7 +129,7 @@ def input_data():
     SPEED_MAX = Y_data.max()
     SPEED_MIN = Y_data.min()
 
-    return fcX_data, convX_data, lstmX_data, E_data, Y_data
+    return S_data, C_data, E_data, Y_data
 
 #에러계산식
 def MAE(y_test, y_pred):
@@ -143,7 +152,7 @@ def FC_model(X, E):
         if layer_idx != 0:
             layer = tf.matmul(layer, fc_weights[layer_idx])
         else:
-            layer = tf.matmul(np.append(X, E, axis=0), fc_weights[layer_idx])
+            layer = tf.matmul(np.append(X, E, axis=1), fc_weights[layer_idx])
 
         if FC_BATCH_NORM == True:
             layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=batch_prob)
@@ -180,9 +189,10 @@ def CNN_model(X):
 #추후에 실험 1,2 해봐야함
 #실험1: time stamp 1, vector_size 6?7?, cell_size 12, output 1
 #실험2: time stamp 12, vector_size 66, cell_size 12, output 12
-def LSTM_model(X):
+def LSTM_model(X, E):
     # 66(vector_size) * 12(cell size)를 나눠줌
-    x = tf.unstack(X, axis=0)
+    #X,E는 같은 시간 끼리 합쳐줌
+    x = tf.unstack(np.append(X, E, axis=2), axis=0)
 
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
@@ -194,23 +204,34 @@ def LSTM_model(X):
 
 
 #type에 따라 다른 batch slice 결과를 내어준다.
-def batch_slice(data, da_idx, ba_idx, slice_type):
+#da_idx는 cross validation해서 나온 idx의 집합
+#ba_idx는 batch의 idx
+#cell size는 conv+lstm에서 고려해줘야할 conv의 수
+def batch_slice(data, da_idx, ba_idx, slice_type, cell_size):
     if slice_type == 'FC':
         slice_data = data[da_idx[ba_idx * BATCH_SIZE: (ba_idx + 1) * BATCH_SIZE]]
 
     elif slice_type == 'CONV':
-        for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
-            if idx == ba_idx * BATCH_SIZE:
-                slice_data = data[da_idx[idx * SPARTIAL_NUM: (idx + 1) * SPARTIAL_NUM]].reshape(1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
+        for c_idx in range(cell_size):
+            for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
+                start_idx = da_idx[idx]
+                if idx == ba_idx * BATCH_SIZE:
+                    temp = data[(start_idx + c_idx) * SPARTIAL_NUM: ((start_idx + c_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
+                else:
+                    temp = np.append(temp, data[(start_idx + c_idx) * SPARTIAL_NUM: ((start_idx + c_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=1)
+
+            if c_idx == 0:
+                slice_data = temp
             else:
-                slice_data = np.append(slice_data, data[da_idx[idx * SPARTIAL_NUM: (idx + 1) * SPARTIAL_NUM]].reshape(1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=0)
+                slice_data = np.append(slice_data, temp, axis=0)
 
     elif slice_type ==  'LSTM':
         for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
+            start_idx = da_idx[idx]
             if idx == ba_idx * BATCH_SIZE:
-                slice_data = data[da_idx[idx * CELL_SIZE: (idx + 1) * CELL_SIZE]].reshape(1, CELL_SIZE, VECTOR_SIZE)
+                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
             else:
-                slice_data = np.append(slice_data, data[da_idx[idx * CELL_SIZE: (idx + 1).reshape(1, CELL_SIZE, VECTOR_SIZE) * CELL_SIZE]], axis=0)
+                slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1), axis=0)
 
     else:
         print('ERROR: slice type error\n')
