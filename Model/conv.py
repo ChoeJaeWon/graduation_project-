@@ -1,10 +1,9 @@
 '''
 ----------------------------코드 설명----------------------------
-여러 hyper parameter를 greedy search를 통해 최적화 시켜줌
+2.CONV에 해당하는 코드로
+conv+fc로 구현함
 ----------------------------고려 사항----------------------------
-*2019 07 05
-upStream_num, downStream_num은 데이터를 만들때 고려해서 실험 해줘야함
-그래서 mu, md 라는 변수를 만들긴 하지만 나중에 파일에서 읽어와야함
+
 '''
 from module import *
 
@@ -66,7 +65,7 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
 
 ###################################################-MAIN-###################################################
 init()
-_, X_data, Y_data, E_data = input_data()
+_, X_data, _, Y_data, E_data = input_data()
 
 X = tf.placeholder("float32", [None, SPARTIAL_NUM, TEMPORAL_NUM, 1])
 E = tf.placeholder("float32", [None, EXOGENOUS_NUM])

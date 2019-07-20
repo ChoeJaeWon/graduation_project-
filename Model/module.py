@@ -3,7 +3,11 @@ module 파일: 헤더 파일
 구성 요소
 각종 hyper parameter
 
+*2019 07 05
+upStream_num, downStream_num은 데이터를 만들때 고려해서 실험 해줘야함
+그래서 mu, md 라는 변수를 만들긴 하지만 나중에 파일에서 읽어와야함
 '''
+
 import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
@@ -13,8 +17,9 @@ np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준
 
 #Setting
 #File name
-FILEX_FC = '' #fc data 파일 이름(x 데이터)
-FILEX_CONV = '' #preprocessing한 conv data 파일 이름(x 데이터)
+FILEX_FC = '' #fc data 파일 이름(X 데이터)
+FILEX_CONV = '' #preprocessing한 conv data 파일 이름(X 데이터)
+FILEX_LSTM = '' #preprocessing한 lstm data 파일 이름(X 데이터)
 FILE_EXO = '' #exogenous(data 8)만 잘라낸 파일 이름
 FILEY = '' #y data 파일 이름
 
@@ -51,6 +56,8 @@ EXOGENOUS_NUM = 54 #exogenous로 들어가는 data의 개수 [default 54]
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
+VECTOR_SIZE = 66 #lstm하나의 cell에 들어가는 vector의 크기 [default 66]
+TIME_STAMP = 12 #vector에서 고려해주는 시간
 
 
 
@@ -102,6 +109,7 @@ def input_data():
     #file을 numpy로 바꿔줌
     fcX_data = fileToData(FILEX_FC) #전체 fc 데이터(speed + exogenous)
     convX_data = fileToData(FILEX_CONV) #전체 conv 데이터
+    lstmX_data = fileToData(FILEX_LSTM) #전체 lstm 데이터
     E_data = fileToData(FILE_EXO) #외부요소만 자른 데이터
     Y_data = fileToData(FILEY) #실재값 데이터
 
@@ -112,7 +120,7 @@ def input_data():
     SPEED_MAX = Y_data.max()
     SPEED_MIN = Y_data.min()
 
-    return fcX_data, convX_data, E_data, Y_data
+    return fcX_data, convX_data, lstmX_data, E_data, Y_data
 
 #에러계산식
 def MAE(y_test, y_pred):
@@ -172,9 +180,9 @@ def CNN_model(X):
 #추후에 실험 1,2 해봐야함
 #실험1: time stamp 1, vector_size 6?7?, cell_size 12, output 1
 #실험2: time stamp 12, vector_size 66, cell_size 12, output 12
-def LSTM_model(X, E):
+def LSTM_model(X):
     # 66(vector_size) * 12(cell size)를 나눠줌
-    x = tf.unstack(np.append(X, E, axis=1), axis=0)
+    x = tf.unstack(X, axis=0)
 
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
@@ -200,9 +208,9 @@ def batch_slice(data, da_idx, ba_idx, slice_type):
     elif slice_type ==  'LSTM':
         for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
             if idx == ba_idx * BATCH_SIZE:
-                slice_data = data[da_idx[idx * CELL_SIZE: (idx + 1) * CELL_SIZE]]
+                slice_data = data[da_idx[idx * CELL_SIZE: (idx + 1) * CELL_SIZE]].reshape(1, CELL_SIZE, VECTOR_SIZE)
             else:
-                slice_data = np.append(slice_data, data[da_idx[idx * CELL_SIZE: (idx + 1) * CELL_SIZE]], axis=0)
+                slice_data = np.append(slice_data, data[da_idx[idx * CELL_SIZE: (idx + 1).reshape(1, CELL_SIZE, VECTOR_SIZE) * CELL_SIZE]], axis=0)
 
     else:
         print('ERROR: slice type error\n')
