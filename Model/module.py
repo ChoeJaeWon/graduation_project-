@@ -17,6 +17,8 @@ conv의 filter size와 layer등의 default값을 정해주어야 한다.
 
 각각의 module이 batch를 제대로 반영하고 있는지 확인해야함
 
+batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
+
 '''
 
 import tensorflow as tf
@@ -207,28 +209,28 @@ def LSTM_model(X, E):
 #da_idx는 cross validation해서 나온 idx의 집합
 #ba_idx는 batch의 idx
 #cell size는 conv+lstm에서 고려해줘야할 conv의 수
-def batch_slice(data, da_idx, ba_idx, slice_type, cell_size):
+def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
     if slice_type == 'FC':
-        slice_data = data[da_idx[ba_idx * BATCH_SIZE: (ba_idx + 1) * BATCH_SIZE]]
+        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]]
 
     elif slice_type == 'CONV':
-        for c_idx in range(cell_size):
-            for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
-                start_idx = da_idx[idx]
-                if idx == ba_idx * BATCH_SIZE:
-                    temp = data[(start_idx + c_idx) * SPARTIAL_NUM: ((start_idx + c_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
+        for cell_idx in range(cell_size):
+            for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
+                start_idx = data_idx[idx]
+                if idx == batch_idx * BATCH_SIZE:
+                    temp = data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
                 else:
-                    temp = np.append(temp, data[(start_idx + c_idx) * SPARTIAL_NUM: ((start_idx + c_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=1)
+                    temp = np.append(temp, data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=1)
 
-            if c_idx == 0:
+            if cell_idx == 0:
                 slice_data = temp
             else:
                 slice_data = np.append(slice_data, temp, axis=0)
 
     elif slice_type ==  'LSTM':
-        for idx in range(ba_idx * BATCH_SIZE, (ba_idx + 1) * BATCH_SIZE):
-            start_idx = da_idx[idx]
-            if idx == ba_idx * BATCH_SIZE:
+        for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
+            start_idx = data_idx[idx]
+            if idx == batch_idx * BATCH_SIZE:
                 slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
             else:
                 slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1), axis=0)
