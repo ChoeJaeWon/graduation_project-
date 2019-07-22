@@ -17,8 +17,7 @@ def model(X, E, Y):
     adv_y = np.append(X, Y, axis=1)
     adv_g = np.append(X, layer, axis=1)
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E)) + tf.log(1 - Discriminator_model(adv_g, E)))
-    loss_G = -tf.reduce_mean(
-        tf.log(Discriminator_model(adv_g, E))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
     train_D = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_D)
     train_G = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_G)

@@ -12,6 +12,7 @@
 module.py: header file. It has define value and model(fc, conv, lstm, adloss) function
 conv.py: 2.CONV file. It is constructed by CONV+FC
 
+
 7월 22일 commit 정리
 1. adv_conv, adv_conv_lstm, adv_fc, adv_lstm 파일 추가 
 2. 파이썬3 에서는 같은 디렉토리안의 모듈을 import할때 name 앞에 . 을 붙여 참조합니다

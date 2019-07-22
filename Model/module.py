@@ -17,8 +17,7 @@ conv의 filter size와 layer등의 default값을 정해주어야 한다.
 각각의 module이 batch를 제대로 반영하고 있는지 확인해야함
 *2019 07 22
 66 -> 80? 바꿔야합니다
-adv 4가지 업데이트
-
+tf.reduce_mean 이 이 실험에서 무슨 의미인가?
 
 Q. batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
 A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 구해준다.
