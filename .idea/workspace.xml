@@ -2,17 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="64f29497-f85d-4962-b57f-d56e0132a1e8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Model/adv/adv_conv.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Model/adv/adv_conv_lstm.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Model/adv/adv_fc.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Model/adv/adv_lstm.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/README.md" afterPath="$PROJECT_DIR$/Model/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/conv.py" afterPath="$PROJECT_DIR$/Model/conv.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/conv_lstm.py" afterPath="$PROJECT_DIR$/Model/conv_lstm.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/fc.py" afterPath="$PROJECT_DIR$/Model/fc.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/lstm.py" afterPath="$PROJECT_DIR$/Model/lstm.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Model/module.py" afterPath="$PROJECT_DIR$/Model/module.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,11 +13,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="adv_conv_lstm.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="adv_conv_lstm.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/adv/adv_conv_lstm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="34" column="48" lean-forward="true" selection-start-line="34" selection-start-column="48" selection-end-line="34" selection-end-column="48" />
+            <state relative-caret-position="225">
+              <caret line="15" column="32" lean-forward="true" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -65,12 +55,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Model/README.md">
           <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="375">
-                <caret line="25" column="3" lean-forward="true" selection-start-line="25" selection-start-column="3" selection-end-line="25" selection-end-column="3" />
+              <first_editor relative-caret-position="315">
+                <caret line="21" column="7" lean-forward="false" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
                 <folding />
               </first_editor>
               <second_editor />
@@ -168,8 +158,8 @@
         <option value="$PROJECT_DIR$/Model/adv_conv_lstm.py" />
         <option value="$PROJECT_DIR$/Model/adv_fc.py" />
         <option value="$PROJECT_DIR$/Model/adv_lstm.py" />
-        <option value="$PROJECT_DIR$/Model/README.md" />
         <option value="$PROJECT_DIR$/Model/adv/adv_conv_lstm.py" />
+        <option value="$PROJECT_DIR$/Model/README.md" />
       </list>
     </option>
   </component>
@@ -471,22 +461,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="375">
-            <caret line="25" column="3" lean-forward="true" selection-start-line="25" selection-start-column="3" selection-end-line="25" selection-end-column="3" />
-            <folding />
-          </first_editor>
-          <second_editor />
+    <entry file="file://$PROJECT_DIR$/Model/adv/adv_conv_lstm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" column="32" lean-forward="true" selection-start-line="15" selection-start-column="32" selection-end-line="15" selection-end-column="32" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/adv/adv_conv_lstm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="34" column="48" lean-forward="true" selection-start-line="34" selection-start-column="48" selection-end-line="34" selection-end-column="48" />
-          <folding />
+    <entry file="file://$PROJECT_DIR$/Model/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="315">
+            <caret line="21" column="7" lean-forward="false" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+            <folding />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
