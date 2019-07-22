@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="079daad2-5bdc-4cc1-8855-0af7bc8581bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Conv.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Conv.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/preprocess_onehot.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conv.py" beforeDir="false" afterPath="$PROJECT_DIR$/conv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/conv_lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/module.py" beforeDir="false" afterPath="$PROJECT_DIR$/module.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Preprocess/CONV/preprocessForConv.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Preprocess/CONV/preprocessForConv.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,7 +13,7 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/module.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="270">
@@ -31,6 +23,11 @@
               </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/preprocess_onehot.py">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -109,6 +106,7 @@
         <option value="$PROJECT_DIR$/fc.py" />
         <option value="$PROJECT_DIR$/lstm.py" />
         <option value="$PROJECT_DIR$/module.py" />
+        <option value="$PROJECT_DIR$/preprocess_onehot.py" />
       </list>
     </option>
   </component>
@@ -234,7 +232,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32866243" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32866243" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3991323" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -311,6 +309,9 @@
           </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/preprocess_onehot.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
