@@ -3,7 +3,7 @@ from sklearn.model_selection import KFold
 import tensorflow as tf
 
 np.random.seed(77)
-
+'''
 X = np.array([1, 2])
 Y = np.array([2, 3])
 
@@ -20,3 +20,8 @@ print(a)
 
 sess =tf.Session()
 print(sess.run([tf.unstack(np.array([[0,1,2],[3,4,5]]),axis=0)]))
+'''
+
+X = [1,2,3,4,5,6,7,8,9,10]
+a = X[:-2]
+print(a)

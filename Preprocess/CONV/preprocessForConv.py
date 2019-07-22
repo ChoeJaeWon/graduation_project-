@@ -2,7 +2,7 @@ import csv
 import os
 import errno
 
-sequence_size = 3 #sequence size, if sequence_size is 1 it will be used for conv itself not a conv-lstm
+sequence_size = 1 #sequence size, if sequence_size is 1 it will be used for conv itself not a conv-lstm
 m = 2  #s - m to s  and s to s + m  ==spatial size
 spatial_size = m*2 + 1 #for convolution matrix
 

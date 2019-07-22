@@ -17,7 +17,8 @@ conv의 filter size와 layer등의 default값을 정해주어야 한다.
 
 각각의 module이 batch를 제대로 반영하고 있는지 확인해야함
 
-batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
+Q. batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
+A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 구해준다.
 
 '''
 
@@ -30,10 +31,10 @@ np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준
 
 #Setting
 #File name
-FILEX_SPEED = '' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '' #exogenous(data 8)만 잘라낸 파일 이름(X data)
-FILEX_CONV = '' #preprocessing한 conv data 파일 이름(X data)
-FILEY = '' #beta분 후 speed 파일 이름(Y data)
+FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/Exogenous/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
+FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
 TRAIN_NUM = 1000#traing 회수

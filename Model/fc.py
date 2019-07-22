@@ -78,7 +78,7 @@ cost_MAE, cost_MSE, cost_MAPE, optimal = model(X, E, Y)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
-for train_idx, test_idx in kf.split(Y_data):
+for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     train(X_data, E_data, Y_data, cost_MSE, optimal, train_idx)
     test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
     cr_idx=cr_idx+1
