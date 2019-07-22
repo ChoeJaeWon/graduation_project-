@@ -14,8 +14,11 @@ upStream_num, downStream_num은 데이터를 만들때 고려해서 실험 해�
 input_data에서 안사용하는 데이터도 모두 받아와야하는데 이를 조건문으로 바꿔줄 필요가있다.
 *2019 07 21
 conv의 filter size와 layer등의 default값을 정해주어야 한다.
-
 각각의 module이 batch를 제대로 반영하고 있는지 확인해야함
+*2019 07 22
+66 -> 80? 바꿔야합니다
+adv 4가지 업데이트
+
 
 Q. batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
 A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 구해준다.
@@ -72,15 +75,26 @@ CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 VECTOR_SIZE = 66 #lstm하나의 cell에 들어가는 vector의 크기 [default 66]
 TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간
 
-
+#Hyper Parameter(Discriminator)
+DISCRIMINATOR_LAYER_NUM = 3
+DISCRIMINATOR_LAYER_UNIT_NUM = []
+DISCRIMINATOR_BATCH_NORM = True
+DISCRIMINATOR_DROPOUT = True
+DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
+DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
+DISCRIMINATOR_ALPHA = 0.01 #MSE 앞에 붙는 람다 term
 
 fc_weights = [] #fc weight들의 크기는 layer의 길이에 따라 결정된다.
+discriminator_weights = []
 conv_weights = [] #conv weight들의 크기는 layer의 길이에 따라 결정된다.
 lstm_weights = [] #lstm weight들의 크기는 layer의 길이에 따라 결정된다.
 lstm_biases = [] #lstm bias들의 크기는 layer의 길이에 따라 결정된다.
 
 batch_prob = tf.placeholder(tf.bool) #feed_dict에 들어가는 값으로 training에서는 true로 하여 분산 평균을 업데이트 해주고, test에서는 안해주게 false로 해준다.
 dropout_prob = tf.placeholder(tf.float32) #feed dict에 들어가는 값으로 training에서는 FC_TR_KEEP_PROB으로 testing에서는 FC_TE_KEEP_PROP으로 사용한다.
+
+discriminator_batch_prob = tf.placeholder(tf.bool)
+discriminator_dropout_prob = tf.placeholder(tf.float32)
 
 #weight를 만들어준다.
 def init():
@@ -96,6 +110,9 @@ def init():
     lstm_weights.append(init_weights([HIDDEN_NUM, 1]))
     lstm_biases.append(init_weights([1]))
 
+    # discriminator weight 초기화
+    for layer_idx in range(1, DISCRIMINATOR_LAYER_NUM):
+        fc_weights.append(init_weights([DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx - 1], DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx]]))
 
 
 #shper를 input으로 받아 weight를 initailization 해줌
@@ -204,6 +221,26 @@ def LSTM_model(X, E):
     # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
 
+#discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 X랑 다름
+def Discriminator_model(X, E):
+    for layer_idx in range(DISCRIMINATOR_LAYER_NUM): #same as FC_LAYER_NUM
+        if layer_idx != 0:
+            layer = tf.matmul(layer, discriminator_weights[layer_idx])
+        else:
+            layer = tf.matmul(np.append(X, E, axis=1), discriminator_weights[layer_idx])
+
+        if DISCRIMINATOR_BATCH_NORM == True:
+            layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
+        # 마지막 레이어는 Sigmoid logistic regression, 마지막 출력이 1이라는 가정 하에 작성합니다
+        if layer_idx == DISCRIMINATOR_LAYER_NUM - 1:
+            layer = tf.nn.sigmoid(layer)
+        else:
+            layer = tf.nn.relu(layer)
+
+        if DISCRIMINATOR_DROPOUT == True:
+            tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
+
+    return layer
 
 
 #type에 따라 다른 batch slice 결과를 내어준다.

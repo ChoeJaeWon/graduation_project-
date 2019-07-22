@@ -1,41 +1,42 @@
 '''
 ----------------------------코드 설명----------------------------
--C-
-4.CONV+LSTM에 해당하는 코드로
-CONV + LSTM으로 구현함
+
 ----------------------------고려 사항----------------------------
 
+기존의 lstm 은 only speed 만 고려해야한다 ?? 이게 무슨 말
 '''
-from .module import *
+from Model.module import *
 
-#CONV+LSTM을 구현
-def model(C, E, Y):
-    for idx in range(CELL_SIZE):
-        if idx == 0:
-            layer = tf.reshape(CNN_model(C[idx]), [1, BATCH_SIZE, TIME_STAMP])
-        else:
-            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx]), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
-    layer = LSTM_model(layer, E)
+#LSTM을 구현
+def model(X, E, Y):
+    layer = LSTM_model(X, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
     cost_MAPE = MAPE(Y, layer)
-    optimal = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost_MSE)
+    adv_y = np.append(X, Y, axis=1)
+    adv_g = np.append(X, layer, axis=1)
+    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E)) + tf.log(1 - Discriminator_model(adv_g, E)))
+    loss_G = -tf.reduce_mean(
+        tf.log(Discriminator_model(adv_g, E))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
-    return cost_MAE, cost_MSE, cost_MAPE, optimal
+    train_D = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_D)
+    train_G = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_G)
+
+    return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
 #training 해준다.
-def train(X_data, E_data, Y_data, cost_MSE, optimal, train_idx):
+def train(X_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     for tr_idx in range(TRAIN_NUM):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
-            X_train = batch_slice(X_data, train_idx, ba_idx, 'LSTM', CELL_SIZE)
+            X_train = batch_slice(X_data, train_idx, ba_idx, 'LSTM', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
-
-            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={X:X_train, E:E_train, Y: Y_train })
+            _ = sess.run([train_D], feed_dict={X:X_train, E:E_train, Y: Y_train ,discriminator_batch_prob:True, discriminator_dropout_prob: DISCRIMINATOR_TR_KEEP_PROB})
+            cost_MSE_val, _= sess.run([cost_MSE, train_G], feed_dict={X:X_train, E:E_train, Y: Y_train ,discriminator_batch_prob:True, discriminator_dropout_prob: DISCRIMINATOR_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
 
         #한 epoch당 cost_MSE의 평균을 구해준다.
@@ -53,11 +54,11 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         # Batch Slice
-        X_test = batch_slice(X_data, test_idx, ba_idx, 'LSTM', CELL_SIZE)
+        X_test = batch_slice(X_data, test_idx, ba_idx, 'LSTM', 1)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={X:X_test, E:E_test, Y:Y_test})
+        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={X:X_test, E:E_test, Y:Y_test,discriminator_batch_prob: False, discriminator_dropout_prob:DISCRIMINATOR_TE_KEEP_PROB})
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
@@ -78,11 +79,11 @@ Y = tf.placeholder("float32", [None, 1])
 
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
-cost_MAE, cost_MSE, cost_MAPE, optimal = model(X, E, Y)
+cost_MAE, cost_MSE, cost_MAPE,  train_D, train_G = model(X, E, Y)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
-    train(X_data, Y_data, cost_MSE, optimal, train_idx)
+    train(X_data, Y_data, cost_MSE,  train_D, train_G, train_idx)
     test(X_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
     cr_idx=cr_idx+1
