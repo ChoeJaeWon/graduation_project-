@@ -32,11 +32,11 @@ def train(C_data, E_data, Y_data, cost_MSE, optimal, train_idx):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
-            X_train = batch_slice(C_data, train_idx, ba_idx, 'LSTM', CELL_SIZE)
+            C_train = batch_slice(C_data, train_idx, ba_idx, 'LSTM', CELL_SIZE)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
-            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={X:X_train, E:E_train, Y: Y_train })
+            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={C:C_train, E:E_train, Y: Y_train })
             epoch_cost += cost_MSE_val
 
         #한 epoch당 cost_MSE의 평균을 구해준다.
@@ -54,11 +54,11 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         # Batch Slice
-        X_test = batch_slice(C_data, test_idx, ba_idx, 'LSTM', CELL_SIZE)
+        C_test = batch_slice(C_data, test_idx, ba_idx, 'LSTM', CELL_SIZE)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={X:X_test, E:E_test, Y:Y_test})
+        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test})
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
@@ -72,7 +72,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
 ###################################################-MAIN-###################################################
 _, C_data, E_data,Y_data= input_data(0b011)
 
-X = tf.placeholder("float32", [None, CELL_SIZE, TIME_STAMP])
+C = tf.placeholder("float32", [None, CELL_SIZE, TIME_STAMP])
 E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
 Y = tf.placeholder("float32", [None, 1])
 
