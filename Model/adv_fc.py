@@ -19,8 +19,10 @@ def model(X, E, Y):
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E)) + tf.log(1 - Discriminator_model(adv_g, E)))
     loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
-    train_D = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_D)
-    train_G = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_G)
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        train_D = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_D)
+        train_G = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_G)
 
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
@@ -69,21 +71,24 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
 
 
 ###################################################-MAIN-###################################################
-init()
-X_data, _, Y_data, E_data = input_data()
+S_data, _, Y_data, E_data = input_data(0b101)
 
 S = tf.placeholder("float32", [None, TIME_STAMP])
 E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
 Y = tf.placeholder("float32", [None, 1])
 
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-cost_MAE, cost_MSE, cost_MAPE, train_D, train_G = model(S, E, Y)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
-    train(X_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx)
-    test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
+
+    init()
+
+    sess = tf.Session()
+    cost_MAE, cost_MSE, cost_MAPE, train_D, train_G = model(S, E, Y)
+    sess.run(tf.global_variables_initializer())
+
+    train(S_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx)
+    test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
     cr_idx=cr_idx+1
 
