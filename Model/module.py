@@ -63,17 +63,18 @@ FC_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 FC_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 
 #Hyper Parameter(CONV)
-POOLING = True #pooling을 사용할 것인지 [default True]
+POOLING = False #pooling을 사용할 것인지 [default True]
 CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
-TIME_SEQUENCE = 12 #ouput의 크기 [default 12] **이름 바꿔야함
-CONV_LAYER_NUM = 4 #conv layer의 깊이 [default 4]
+CONV_LAYER_NUM = 3 #conv layer의 깊이 [default 3]
 TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
 UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
 DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
-CHANNEL_NUM = [1, 64, 128, 64, 32] #conv에서 고려해줄 channel 수 [default 1 64 128 64 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
-FILTER_SIZE_TEMPORAL = [3, 3, 3, 3] #시간의 filter size [default 3 3 3 3]
-FILTER_SIZE_SPATIAL = [3, 3, 3, 3] #공간의 filter size [default 3 3 3 3]
+CHANNEL_NUM = [1, 64, 16, 32] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
+FILTER_SIZE_TEMPORAL = [3, 1, 3] #시간의 filter size [default 3 1 3]
+FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
+LAST_LAYER_SIZE = 8
+
 
 #Hyper Parameter(LSTM)
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
@@ -93,6 +94,7 @@ DISCRIMINATOR_ALPHA = 0.01 #MSE 앞에 붙는 람다 term
 fc_weights = [] #fc weight들의 크기는 layer의 길이에 따라 결정된다.
 discriminator_weights = []
 conv_weights = [] #conv weight들의 크기는 layer의 길이에 따라 결정된다.
+convfc_weights = [] #conv 이후 fc의 weight
 lstm_weights = [] #lstm weight들의 크기는 layer의 길이에 따라 결정된다.
 lstm_biases = [] #lstm bias들의 크기는 layer의 길이에 따라 결정된다.
 
@@ -118,6 +120,7 @@ def init():
     # conv weight 초기화
     for layer_idx in range(1,CONV_LAYER_NUM+1):
         conv_weights.append(init_weights([FILTER_SIZE_SPATIAL[layer_idx-1], FILTER_SIZE_TEMPORAL[layer_idx-1], CHANNEL_NUM[layer_idx-1], CHANNEL_NUM[layer_idx]]))
+    convfc_weights.append(init_weights([LAST_LAYER_SIZE*CHANNEL_NUM[CONV_LAYER_NUM],TIME_STAMP]))
 
     # lstm weight 초기화
     lstm_weights.append(init_weights([HIDDEN_NUM, 1]))
@@ -203,15 +206,19 @@ def FC_model(S, E):
 def CNN_model(X):
     for layer_idx in range(CONV_LAYER_NUM):
         if layer_idx != 0:
-            layer = tf.nn.conv2d(layer, conv_weights[layer_idx], strides=[1, 1, 1, 1])
+            layer = tf.nn.conv2d(layer, conv_weights[layer_idx], strides=[1, 1, 1, 1], padding='VALID')
         else:
-            layer = tf.nn.conv2d(X, conv_weights[layer_idx], strides=[1, 1, 1, 1])
+            layer = tf.nn.conv2d(X, conv_weights[layer_idx], strides=[1, 1, 1, 1], padding='VALID')
 
         if CONV_LAYER_NUM == True:
             layer = tf.layers.batch_normalization(layer, center=True, scale= True, training=batch_prob)
         layer = tf.nn.relu(layer)
         if POOLING == True and layer_idx != (CONV_LAYER_NUM-1): #마지막 layer는 pooling안함
             layer = tf.nn.avg_pool(layer, ksize=[1,2,2,1], strides=[1,1,1,1])
+
+    layer = tf.reshape(layer, shape=[BATCH_SIZE, CHANNEL_NUM[CONV_LAYER_NUM]*LAST_LAYER_SIZE])
+    layer = tf.matmul(layer, convfc_weights[0])
+    layer = tf.nn.relu(layer)
 
     #**fc 하나 추가해 주어야함
 
