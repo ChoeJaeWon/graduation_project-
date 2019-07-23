@@ -22,6 +22,9 @@ tf.reduce_mean 이 이 실험에서 무슨 의미인가?
 Q. batch slice에서 +를 통해 data index에 접근하는데 이때 최대치를 넘어버릴 수 있다
 A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 구해준다.
 
+*2019 07 23
+Q. conv에 뒤에 32채널을 1채널로 바꾸고 12개의 속도 데이터로 concat해주는 코드가 작성 되어야 한다.
+
 '''
 
 import tensorflow as tf
@@ -43,10 +46,12 @@ TRAIN_NUM = 1000#traing 회수
 SPEED_MAX = 0#data내의 최고 속도(input_data에서 구해준다.)
 SPEED_MIN = 0#data내의 최저 속도(input_data에서 구해준다.)
 CROSS_NUM = 5 #cross validation의 수
+BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 
 #Hyper Parameter(FC)
-FC_LAYER_NUM = 3 #fc layer의 깊이 [default 3]
-LAYER_UNIT_NUM = [] #fc에서 고려해줄 layer당 unit의 수 default[66, 64, 128, 64, 1]
+FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
+VECTOR_SIZE = 80 #fc와 lstm에 들어가는 vector의 크기 [default 80]
+LAYER_UNIT_NUM = [VECTOR_SIZE, 256, 128, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[80, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
 FC_DROPOUT = True #fc 에서 drop out 을 사용할것인지 [default True]
 FC_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
@@ -55,28 +60,27 @@ FC_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 #Hyper Parameter(CONV)
 POOLING = True #pooling을 사용할 것인지 [default True]
 CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
-BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TIME_SEQUENCE = 12 #ouput의 크기 [default 12] **이름 바꿔야함
-CONV_LAYER_NUM = 3 #conv layer의 깊이 [default 3]
+CONV_LAYER_NUM = 4 #conv layer의 깊이 [default 4]
 TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
-UP_STREAM_NUM = 6 #conv에서 고려할 이후의 도로 개수들 [default 6]
-DOWN_STREAM_NUM = 6 #conv에서 고려할 이전의 도로 개수들 [default 6]
+UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
+DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
-CHANNEL_NUM = [] #conv에서 고려해줄 channel 수 [default 1 64 128 64 1] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
-FILTER_SIZE_TEMPORAL = [] #시간의 filter size [default 3]
-FILTER_SIZE_SPATIAL = [] #공간의 filter size [default 3]
+CHANNEL_NUM = [1, 64, 128, 64, 32] #conv에서 고려해줄 channel 수 [default 1 64 128 64 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
+FILTER_SIZE_TEMPORAL = [3, 3, 3, 3] #시간의 filter size [default 3 3 3 3]
+FILTER_SIZE_SPATIAL = [3, 3, 3, 3] #공간의 filter size [default 3 3 3 3]
 EXOGENOUS_NUM = 54 #exogenous로 들어가는 data의 개수 [default 54]
 
 #Hyper Parameter(LSTM)
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
-VECTOR_SIZE = 66 #lstm하나의 cell에 들어가는 vector의 크기 [default 66]
 TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간
 
 #Hyper Parameter(Discriminator)
-DISCRIMINATOR_LAYER_NUM = 3
-DISCRIMINATOR_LAYER_UNIT_NUM = []
+DISCRIMINATOR_INPUT_NUM = 84
+DISCRIMINATOR_LAYER_NUM = 4
+DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 256, 128, 64, 1]
 DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
@@ -111,12 +115,12 @@ def init():
 
     # discriminator weight 초기화
     for layer_idx in range(1, DISCRIMINATOR_LAYER_NUM):
-        fc_weights.append(init_weights([DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx - 1], DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx]]))
+        discriminator_weights.append(init_weights([DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx - 1], DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx]]))
 
 
 #shper를 input으로 받아 weight를 initailization 해줌
 def init_weights(input_shape):
-    return tf.get_variable(shape=input_shape, initializer=tf.contrib.layers.xavier_initializer())
+    return tf.Variable(tf.random_normal(input_shape, stddev=0.01)) #name은 임의로 정했음
 
 
 #file을 numpy array 데이터로 받아옴
