@@ -1,12 +1,12 @@
 -Make 8 Type Model
 1.FC: input_type(101)
-2.CONV: input_type(111)
+2.CONV: input_type(011)
 3.LSTM: input_type(101)
-4.CONV+LSTM: input_type(111)
-5.FC+ADLOSS
-6.CONV+ADLOSS
-7.LSTM+ADLOSS
-8.CONV+LSTM+ADLOSS
+4.CONV+LSTM: input_type(011)
+5.FC+ADLOSS: input_type(101)
+6.CONV+ADLOSS: input_type(111)
+7.LSTM+ADLOSS: input_type(101)
+8.CONV+LSTM+ADLOSS: input_type(111)
 
 -File Information
 module.py: header file. It has define value and model(fc, conv, lstm, adloss) function
