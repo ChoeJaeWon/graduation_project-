@@ -39,7 +39,7 @@ def train(X_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx):
             epoch_cost += cost_MSE_val
 
         #한 epoch당 cost_MSE의 평균을 구해준다.
-        print("Train Cost%d: %lf\n", tr_idx, epoch_cost/BATCH_NUM)
+        print("Train Cost%d: %lf" % (tr_idx, epoch_cost/BATCH_NUM ))
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
@@ -63,7 +63,7 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         mape += cost_MAPE_val
 
 
-    print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)\n", cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM)
+    print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM))
 
 
 
@@ -86,3 +86,4 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     train(X_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx)
     test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
     cr_idx=cr_idx+1
+

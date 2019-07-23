@@ -16,7 +16,10 @@ def model(S, E, Y):
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
     cost_MAPE = MAPE(Y, layer)
-    optimal = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost_MSE)
+
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        optimal = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost_MSE)
 
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
@@ -57,8 +60,6 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
-
-
 
     print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM))
 
