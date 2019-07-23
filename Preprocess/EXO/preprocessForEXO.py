@@ -11,7 +11,7 @@ speed_len = 12
 data_dir = 'origin/'
 result_dir = 'preprocess/'
 
-xFile = ['x_data_2016204_5min_60min_60min_1.csv','x_data_2016204_5min_60min_60min_2.csv','x_data_2016204_5min_60min_60min_3.csv','x_data_2016204_5min_60min_60min_4.csv','x_data_2016204_5min_60min_60min_5.csv','x_data_2016204_5min_60min_60min_6.csv','x_data_2016204_5min_60min_60min_7.csv','x_data_2016204_5min_60min_60min_8.csv']
+xFile = ['x_data_1046958_5min_60min_60min_8.csv','x_data_2016204_5min_60min_60min_2.csv','x_data_2016204_5min_60min_60min_3.csv','x_data_2016204_5min_60min_60min_4.csv','x_data_2016204_5min_60min_60min_5.csv','x_data_2016204_5min_60min_60min_6.csv','x_data_2016204_5min_60min_60min_7.csv','x_data_2016204_5min_60min_60min_8.csv']
 onehotFile = ['onehot_vec.csv']
 yFile = ['y_data_2016204_5min_60min_60min.csv']
 
@@ -36,7 +36,7 @@ def make_outputFile(text_list, onehot_list, file):
         #onehot 부분에 +speed_len/288은 12개의 speed 때문에 첫날의 값이 12개 없어짐을 나타내고
         #뒤의 +1은 onehot_vec.csv에 첫줄이 string 값이기 때문에 더해준다.
         #이와 같은 맥락으로 [1:]이 작성되었다
-        output.writerow(text_list[line_idx][speed_len:3*speed_len]+ onehot_list[int((line_idx+speed_len)/288)+1][1:] +text_list[line_idx][3*speed_len+6:])
+        output.writerow(text_list[line_idx][speed_len: 3*speed_len]+ onehot_list[int((line_idx+speed_len)/288)+1][1:] +text_list[line_idx][3*speed_len+6:])
     outputfile.close()
 
 

@@ -16,7 +16,7 @@ def model(S, E, Y):
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
     cost_MAPE = MAPE(Y, layer)
-    optimal = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost_MSE)
+    optimal = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost_MSE)
 
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
@@ -35,7 +35,7 @@ def train(S_data, E_data, Y_data, cost_MSE, optimal, train_idx):
             epoch_cost += cost_MSE_val
 
         #한 epoch당 cost_MSE의 평균을 구해준다.
-        print("Train Cost%d: %lf\n", tr_idx, epoch_cost/BATCH_NUM)
+        print("Train Cost%d: %lf" % (tr_idx, epoch_cost/BATCH_NUM ))
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
@@ -59,26 +59,28 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         mape += cost_MAPE_val
 
 
-    print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)\n", cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM)
+
+    print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM))
 
 
 
 
 ###################################################-MAIN-###################################################
-init()
-S_data, _, Y_data, E_data = input_data()
+S_data, _, E_data, Y_data  = input_data(0b101) #speed, exogenous 사용
 
 S = tf.placeholder("float32", [None, TIME_STAMP])
 E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
 Y = tf.placeholder("float32", [None, 1])
 
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y)
-
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+    init()
+
+    sess = tf.Session()
+    cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y)
+    sess.run(tf.global_variables_initializer())
+
     train(S_data, E_data, Y_data, cost_MSE, optimal, train_idx)
     test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
     cr_idx=cr_idx+1

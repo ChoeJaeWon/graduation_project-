@@ -25,6 +25,8 @@ A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 �
 *2019 07 23
 Q. conv에 뒤에 32채널을 1채널로 바꾸고 12개의 속도 데이터로 concat해주는 코드가 작성 되어야 한다.
 
+Q. SPEED_MAX와 SPEED_MIN값 찾아야한다
+
 '''
 
 import tensorflow as tf
@@ -33,25 +35,28 @@ from sklearn.model_selection import KFold
 import csv
 
 np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
+tf.set_random_seed(777) #tf.random의 seed 설정
 
 #Setting
 #File name
-FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/Exogenous/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_SPEED = '../Data/Speed/x_data_1046958_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/Exogenous/x_data_1046958_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 1000#traing 회수
-SPEED_MAX = 0#data내의 최고 속도(input_data에서 구해준다.)
-SPEED_MIN = 0#data내의 최저 속도(input_data에서 구해준다.)
+TRAIN_NUM = 100 #traing 회수 [default 1000]
+SPEED_MAX = 103 #data내의 최고 속도 [default 100]
+SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 수
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
-VECTOR_SIZE = 80 #fc와 lstm에 들어가는 vector의 크기 [default 80]
-LAYER_UNIT_NUM = [VECTOR_SIZE, 256, 128, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[80, 64, 128, 64, 1]
+VECTOR_SIZE = 66 #fc와 lstm에 들어가는 vector의 크기 [default 83]
+TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
+EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
+LAYER_UNIT_NUM = [VECTOR_SIZE, 256, 128, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
 FC_DROPOUT = True #fc 에서 drop out 을 사용할것인지 [default True]
 FC_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
@@ -69,13 +74,11 @@ SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로�
 CHANNEL_NUM = [1, 64, 128, 64, 32] #conv에서 고려해줄 channel 수 [default 1 64 128 64 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
 FILTER_SIZE_TEMPORAL = [3, 3, 3, 3] #시간의 filter size [default 3 3 3 3]
 FILTER_SIZE_SPATIAL = [3, 3, 3, 3] #공간의 filter size [default 3 3 3 3]
-EXOGENOUS_NUM = 54 #exogenous로 들어가는 data의 개수 [default 54]
 
 #Hyper Parameter(LSTM)
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
-TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간
 
 #Hyper Parameter(Discriminator)
 DISCRIMINATOR_INPUT_NUM = 84
@@ -101,20 +104,27 @@ discriminator_dropout_prob = tf.placeholder(tf.float32)
 
 #weight를 만들어준다.
 def init():
+    #모든 weight를 clear 해준다.
+    fc_weights.clear()
+    conv_weights.clear()
+    lstm_weights.clear()
+    lstm_biases.clear()
+    discriminator_weights.clear()
+
     # fc weight 초기화
-    for layer_idx in range(1, FC_LAYER_NUM):
+    for layer_idx in range(1, FC_LAYER_NUM+1):
         fc_weights.append(init_weights([LAYER_UNIT_NUM[layer_idx - 1], LAYER_UNIT_NUM[layer_idx]]))
 
     # conv weight 초기화
-    for layer_idx in range(1,CONV_LAYER_NUM):
-        conv_weights.append(init_weights([FILTER_SIZE_SPATIAL[layer_idx], FILTER_SIZE_TEMPORAL[layer_idx], CHANNEL_NUM[layer_idx-1], CHANNEL_NUM[layer_idx]]))
+    for layer_idx in range(1,CONV_LAYER_NUM+1):
+        conv_weights.append(init_weights([FILTER_SIZE_SPATIAL[layer_idx-1], FILTER_SIZE_TEMPORAL[layer_idx-1], CHANNEL_NUM[layer_idx-1], CHANNEL_NUM[layer_idx]]))
 
     # lstm weight 초기화
     lstm_weights.append(init_weights([HIDDEN_NUM, 1]))
     lstm_biases.append(init_weights([1]))
 
     # discriminator weight 초기화
-    for layer_idx in range(1, DISCRIMINATOR_LAYER_NUM):
+    for layer_idx in range(1, DISCRIMINATOR_LAYER_NUM+1):
         discriminator_weights.append(init_weights([DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx - 1], DISCRIMINATOR_LAYER_UNIT_NUM[layer_idx]]))
 
 
@@ -138,19 +148,20 @@ def fileToData(fileName):
 
 
 #input data를 만들어줌
+#type 2진법 ex) 0b111 4자리는 Speed, 2자리는 Conv, 1자리는 exogenous
 def input_data(type):
+    S_data = np.array([])
+    C_data = np.array([])
+    E_data = np.array([])
     #file을 numpy로 바꿔줌
-    S_data = fileToData(FILEX_SPEED) #only speed 데이터(시간순)
-    C_data = fileToData(FILEX_CONV) #conv 데이터(행(공간), 열(시간))
-    E_data = fileToData(FILEX_EXO)  # 외부요소만 자른 데이터
+    #&로 각 자리를 비교해준다.
+    if type & 0b100 != False:
+        S_data = fileToData(FILEX_SPEED) #only speed 데이터(시간순)
+    if type & 0b10 != False:
+        C_data = fileToData(FILEX_CONV) #conv 데이터(행(공간), 열(시간))
+    if type & 0b1 != False:
+        E_data = fileToData(FILEX_EXO)  # 외부요소만 자른 데이터
     Y_data = fileToData(FILEY) #실재값 데이터
-
-
-    #SPEED_MAX와 SPEED_MIN을 구해줌
-    global  SPEED_MIN
-    global SPEED_MAX
-    SPEED_MAX = Y_data.max()
-    SPEED_MIN = Y_data.min()
 
     return S_data, C_data, E_data, Y_data
 
@@ -170,12 +181,12 @@ def MAPE(y_test, y_pred):
 
 
 #FC_model로 input으로 CNN output이 output으로 예측 속도값이 나온다.
-def FC_model(X, E):
+def FC_model(S, E):
     for layer_idx in range(FC_LAYER_NUM):
         if layer_idx != 0:
             layer = tf.matmul(layer, fc_weights[layer_idx])
         else:
-            layer = tf.matmul(np.append(X, E, axis=1), fc_weights[layer_idx])
+            layer = tf.matmul(tf.concat([S, E], axis=1), fc_weights[layer_idx])
 
         if FC_BATCH_NORM == True:
             layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=batch_prob)

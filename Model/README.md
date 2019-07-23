@@ -1,8 +1,8 @@
 -Make 8 Type Model
-1.FC
-2.CONV
-3.LSTM
-4.CONV+LSTM
+1.FC: input_type(101)
+2.CONV: input_type(111)
+3.LSTM: input_type(101)
+4.CONV+LSTM: input_type(111)
 5.FC+ADLOSS
 6.CONV+ADLOSS
 7.LSTM+ADLOSS
