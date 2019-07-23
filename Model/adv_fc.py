@@ -73,22 +73,22 @@ def test(X_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
 ###################################################-MAIN-###################################################
 S_data, _, Y_data, E_data = input_data(0b101)
 
-S = tf.placeholder("float32", [None, TIME_STAMP])
-E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
-Y = tf.placeholder("float32", [None, 1])
-
-
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+    S = tf.placeholder("float32", [None, TIME_STAMP])
+    E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
+    Y = tf.placeholder("float32", [None, 1])
 
     init()
-
     sess = tf.Session()
     cost_MAE, cost_MSE, cost_MAPE, train_D, train_G = model(S, E, Y)
     sess.run(tf.global_variables_initializer())
 
     train(S_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx)
     test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
+
+    tf.reset_default_graph()
+
     cr_idx=cr_idx+1
 

@@ -48,7 +48,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 20 #traing 회수 [default 1000]
+TRAIN_NUM = 1 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 수
@@ -81,6 +81,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
+LSTM_TRAIN_NUM = 20
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
@@ -239,9 +240,11 @@ def LSTM_model(S, E):
     #X,E는 같은 시간 끼리 합쳐줌
     x = tf.unstack(tf.concat([S, E], axis=2), axis=1)
 
-    lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
+    lstm_cell = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+    #lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
-    outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+    outputs, _ = tf.nn.static_rnn(cell=lstm_cell, inputs=x, dtype= tf.float32, )
+    #outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
 
     # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
