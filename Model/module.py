@@ -24,8 +24,11 @@ A. Cross validation 할때 Cell size만큼을 빼고 train_idx와 test_idx를 �
 
 *2019 07 23
 Q. conv에 뒤에 32채널을 1채널로 바꾸고 12개의 속도 데이터로 concat해주는 코드가 작성 되어야 한다.
+A. 해결했다
 
 Q. SPEED_MAX와 SPEED_MIN값 찾아야한다
+
+Q. conv 채널수 늘리기 정확도가 fc랑 비슷하면 안된다.
 
 '''
 
@@ -45,7 +48,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 20 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 수
@@ -231,10 +234,10 @@ def CNN_model(X):
 #추후에 실험 1,2 해봐야함
 #실험1: time stamp 1, vector_size 6?7?, cell_size 12, output 1
 #실험2: time stamp 12, vector_size 66, cell_size 12, output 12
-def LSTM_model(X, E):
+def LSTM_model(S, E):
     # 66(vector_size) * 12(cell size)를 나눠줌
     #X,E는 같은 시간 끼리 합쳐줌
-    x = tf.unstack(np.append(X, E, axis=2), axis=0)
+    x = tf.unstack(tf.concat([S, E], axis=2), axis=1)
 
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
