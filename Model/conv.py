@@ -10,9 +10,9 @@ conv+fc로 구현함
 from module import *
 
 #FC와 CNN을 합침
-def model(C, E, Y):
-    layer = CNN_model(C[0])
-    layer = FC_model(layer, E)
+def model(C, E, Y, BA, DR):
+    layer = CNN_model(C[0], BA)
+    layer = FC_model(layer, E, BA, DR)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
@@ -35,7 +35,7 @@ def train(C_data, E_data, Y_data, cost_MSE, optimal, train_idx):
             E_train = batch_slice(E_data, train_idx, ba_idx, 'FC', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
-            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={C:C_train, E:E_train, Y: Y_train, batch_prob: True, dropout_prob: FC_TR_KEEP_PROB})
+            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={C:C_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
 
         #한 epoch당 cost_MSE의 평균을 구해준다.
@@ -57,7 +57,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         E_test = batch_slice(E_data, test_idx, ba_idx, 'FC', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, batch_prob: False, dropout_prob: FC_TE_KEEP_PROB})
+        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
@@ -77,10 +77,12 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     C = tf.placeholder("float32", [None, None, SPARTIAL_NUM, TEMPORAL_NUM, 1])
     E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
     Y = tf.placeholder("float32", [None, 1])
+    BA = tf.placeholder(tf.bool)
+    DR = tf.placeholder(tf.float32)
 
     init()
     sess = tf.Session()
-    cost_MAE, cost_MSE, cost_MAPE, optimal = model(C, E, Y)
+    cost_MAE, cost_MSE, cost_MAPE, optimal = model(C, E, Y, BA, DR)
     sess.run(tf.global_variables_initializer())
 
     train(C_data, E_data, Y_data, cost_MSE, optimal, train_idx)

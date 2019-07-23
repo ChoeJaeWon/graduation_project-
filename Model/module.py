@@ -81,7 +81,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 20
+LSTM_TRAIN_NUM = 1 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
@@ -103,9 +103,6 @@ convfc_weights = [] #conv 이후 fc의 weight
 lstm_weights = [] #lstm weight들의 크기는 layer의 길이에 따라 결정된다.
 lstm_biases = [] #lstm bias들의 크기는 layer의 길이에 따라 결정된다.
 
-batch_prob = tf.placeholder(tf.bool) #feed_dict에 들어가는 값으로 training에서는 true로 하여 분산 평균을 업데이트 해주고, test에서는 안해주게 false로 해준다.
-dropout_prob = tf.placeholder(tf.float32) #feed dict에 들어가는 값으로 training에서는 FC_TR_KEEP_PROB으로 testing에서는 FC_TE_KEEP_PROP으로 사용한다.
-
 discriminator_batch_prob = tf.placeholder(tf.bool)
 discriminator_dropout_prob = tf.placeholder(tf.float32)
 
@@ -114,6 +111,7 @@ def init():
     #모든 weight를 clear 해준다.
     fc_weights.clear()
     conv_weights.clear()
+    convfc_weights.clear()
     lstm_weights.clear()
     lstm_biases.clear()
     discriminator_weights.clear()
@@ -189,7 +187,9 @@ def MAPE(y_test, y_pred):
 
 
 #FC_model로 input으로 CNN output이 output으로 예측 속도값이 나온다.
-def FC_model(S, E):
+def FC_model(S, E, BA, DR):
+    batch_prob = BA
+    dropout_prob = DR
     for layer_idx in range(FC_LAYER_NUM):
         if layer_idx != 0:
             layer = tf.matmul(layer, fc_weights[layer_idx])
@@ -208,14 +208,15 @@ def FC_model(S, E):
 
 
 #CONV network로 input으로 시공간 입력이 output으로 layer가 나온다
-def CNN_model(X):
+def CNN_model(X, BA):
+    batch_prob = BA
     for layer_idx in range(CONV_LAYER_NUM):
         if layer_idx != 0:
             layer = tf.nn.conv2d(layer, conv_weights[layer_idx], strides=[1, 1, 1, 1], padding='VALID')
         else:
             layer = tf.nn.conv2d(X, conv_weights[layer_idx], strides=[1, 1, 1, 1], padding='VALID')
 
-        if CONV_LAYER_NUM == True:
+        if CONV_BATCH_NORM == True:
             layer = tf.layers.batch_normalization(layer, center=True, scale= True, training=batch_prob)
         layer = tf.nn.relu(layer)
         if POOLING == True and layer_idx != (CONV_LAYER_NUM-1): #마지막 layer는 pooling안함
