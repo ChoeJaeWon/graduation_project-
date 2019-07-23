@@ -23,8 +23,8 @@ def model(C, E, Y):
 
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_D)
-        train_G = tf.train.AdamOptimizer(learning_rate=0.0002).minimize(loss_G)
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D)
+        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G)
 
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
