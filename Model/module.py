@@ -250,7 +250,7 @@ def LSTM_model(S, E):
     # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
 
-#discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 X랑 다름
+#discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 S랑 다름 -> 매우 중요
 def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     discriminator_batch_prob = DISCRIMINATOR_BA
     discriminator_dropout_prob = DISCRIMINATOR_DR
@@ -260,7 +260,7 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
         if layer_idx != 0:
             layer = tf.matmul(layer, discriminator_weights[layer_idx])
         else:
-            layer = tf.matmul(np.append(X, E, axis=1), discriminator_weights[layer_idx])
+            layer = tf.matmul(tf.concat([X, E], axis=1), discriminator_weights[layer_idx])
 
         if DISCRIMINATOR_BATCH_NORM == True:
             layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)

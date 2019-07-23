@@ -24,3 +24,5 @@ conv.py: 2.CONV file. It is constructed by CONV+FC
 1. 텐서보드 등 비쥬얼라이징
 2. 오토 튜닝
 3. lstm도 그래프 업데이트 해주면 좋은거 아닌가?
+4. conv lstm 은 fc 없이 가기로 한거?
+5. C 마지막에 1은 뭐지?
