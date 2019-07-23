@@ -21,7 +21,9 @@ def model(C, E, Y, BA):
     cost_MSE = MSE(Y, layer)
     cost_MAPE = MAPE(Y, layer)
 
-    optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
 
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
