@@ -32,7 +32,7 @@ def train(C_data, E_data, Y_data, cost_MSE, optimal, train_idx):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
-            C_train = batch_slice(C_data, train_idx, ba_idx, 'LSTM', CELL_SIZE)
+            C_train = batch_slice(C_data, train_idx, ba_idx, 'CONV', CELL_SIZE)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
@@ -54,7 +54,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         # Batch Slice
-        C_test = batch_slice(C_data, test_idx, ba_idx, 'LSTM', CELL_SIZE)
+        C_test = batch_slice(C_data, test_idx, ba_idx, 'CONV', CELL_SIZE)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
 
@@ -77,14 +77,14 @@ _, C_data, E_data,Y_data= input_data(0b011)
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
-    C = tf.placeholder("float32", [None, CELL_SIZE, TIME_STAMP])
-    E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
+    C = tf.placeholder("float32", [CELL_SIZE, None, SPARTIAL_NUM, TEMPORAL_NUM, 1]) #cell_size, batch_size
+    E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM]) #cell_size, batch_size
     Y = tf.placeholder("float32", [None, 1])
 
     init()
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
-    cost_MAE, cost_MSE, cost_MAPE, optimal = model(X, E, Y)
+    cost_MAE, cost_MSE, cost_MAPE, optimal = model(C, E, Y)
 
     train(C_data,E_data, Y_data, cost_MSE, optimal, train_idx)
     test(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)

@@ -238,12 +238,12 @@ def CNN_model(X):
 def LSTM_model(S, E):
     # 66(vector_size) * 12(cell size)를 나눠줌
     #X,E는 같은 시간 끼리 합쳐줌
-    x = tf.unstack(tf.concat([S, E], axis=2), axis=1)
+    x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
 
     lstm_cell = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
     #lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
-    outputs, _ = tf.nn.static_rnn(cell=lstm_cell, inputs=x, dtype= tf.float32, )
+    outputs, _ = tf.nn.static_rnn(cell=lstm_cell, inputs=x, dtype= tf.float32 )
     #outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
 
     # Linear activation, using rnn inner loop last output
@@ -297,9 +297,9 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
         for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
             start_idx = data_idx[idx]
             if idx == batch_idx * BATCH_SIZE:
-                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
+                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
             else:
-                slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(1, CELL_SIZE, -1), axis=0)
+                slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1, -1), axis=1)
 
     else:
         print('ERROR: slice type error\n')

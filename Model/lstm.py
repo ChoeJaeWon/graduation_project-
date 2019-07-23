@@ -74,8 +74,8 @@ S_data, _, E_data,Y_data= input_data(0b101)
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
-    S = tf.placeholder("float32", [None, CELL_SIZE, TIME_STAMP])
-    E = tf.placeholder("float32", [None, CELL_SIZE, EXOGENOUS_NUM])
+    S = tf.placeholder("float32", [CELL_SIZE, None, TIME_STAMP]) #cell_size, batch_size
+    E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM]) #cell_size, batch_size
     Y = tf.placeholder("float32", [None, 1])
 
     init()
