@@ -48,7 +48,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 1 #traing 회수 [default 1000]
+TRAIN_NUM = 5 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 수
@@ -103,8 +103,7 @@ convfc_weights = [] #conv 이후 fc의 weight
 lstm_weights = [] #lstm weight들의 크기는 layer의 길이에 따라 결정된다.
 lstm_biases = [] #lstm bias들의 크기는 layer의 길이에 따라 결정된다.
 
-discriminator_batch_prob = tf.placeholder(tf.bool)
-discriminator_dropout_prob = tf.placeholder(tf.float32)
+
 
 #weight를 만들어준다.
 def init():
@@ -210,6 +209,7 @@ def FC_model(S, E, BA, DR):
 #CONV network로 input으로 시공간 입력이 output으로 layer가 나온다
 def CNN_model(X, BA):
     batch_prob = BA
+
     for layer_idx in range(CONV_LAYER_NUM):
         if layer_idx != 0:
             layer = tf.nn.conv2d(layer, conv_weights[layer_idx], strides=[1, 1, 1, 1], padding='VALID')
@@ -251,7 +251,11 @@ def LSTM_model(S, E):
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
 
 #discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 X랑 다름
-def Discriminator_model(X, E):
+def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
+    discriminator_batch_prob = DISCRIMINATOR_BA
+    discriminator_dropout_prob = DISCRIMINATOR_DR
+
+
     for layer_idx in range(DISCRIMINATOR_LAYER_NUM): #same as FC_LAYER_NUM
         if layer_idx != 0:
             layer = tf.matmul(layer, discriminator_weights[layer_idx])

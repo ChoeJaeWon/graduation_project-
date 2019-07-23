@@ -2,6 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="64f29497-f85d-4962-b57f-d56e0132a1e8" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/Model/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/Model/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/adv_conv.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/adv_conv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/adv_conv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/adv_conv_lstm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/adv_fc.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/adv_fc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model/adv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/adv_lstm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model/module.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model/module.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,17 +20,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/conv_lstm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="69">
-              <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+            <state relative-caret-position="-529">
+              <caret line="36" column="10" lean-forward="true" selection-start-line="36" selection-start-column="10" selection-end-line="38" selection-end-column="69" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/README.md">
+        <entry file="file://$PROJECT_DIR$/Model/conv.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+            <state relative-caret-position="-559">
+              <caret line="30" column="24" lean-forward="true" selection-start-line="30" selection-start-column="24" selection-end-line="30" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -33,17 +38,26 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/fc.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
+            <state relative-caret-position="394">
+              <caret line="76" column="45" selection-start-line="76" selection-start-column="45" selection-end-line="76" selection-end-column="45" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/README.md">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="19" column="22" lean-forward="true" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/module.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="83" column="18" selection-start-line="83" selection-start-column="18" selection-end-line="83" selection-end-column="18" />
+            <state relative-caret-position="260">
+              <caret line="57" column="20" lean-forward="true" selection-start-line="57" selection-start-column="20" selection-end-line="57" selection-end-column="20" />
               <folding>
                 <element signature="e#867#890#0" expanded="true" />
               </folding>
@@ -52,24 +66,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/test.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/lstm.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="20" column="30" lean-forward="true" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/adv_lstm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" column="70" selection-start-line="23" selection-start-column="70" selection-end-line="23" selection-end-column="70" />
+            <state relative-caret-position="-694">
+              <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
             </state>
           </provider>
         </entry>
@@ -77,8 +77,26 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/adv_fc.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="24" column="70" selection-start-line="24" selection-start-column="70" selection-end-line="24" selection-end-column="70" />
+            <state relative-caret-position="-874">
+              <caret line="14" column="28" lean-forward="true" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Model/lstm.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="163">
+              <caret line="20" column="30" lean-forward="true" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Model/adv_conv.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-859">
+              <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -86,17 +104,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model/adv_conv_lstm.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="22" column="48" selection-start-line="22" selection-start-column="48" selection-end-line="22" selection-end-column="48" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Model/adv_conv.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="19" column="41" selection-start-line="19" selection-start-column="41" selection-end-line="19" selection-end-column="41" />
+            <state relative-caret-position="-589">
+              <caret line="38" column="24" lean-forward="true" selection-start-line="38" selection-start-column="24" selection-end-line="38" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -140,15 +149,15 @@
         <option value="$PROJECT_DIR$/Model/adv/adv_conv_lstm.py" />
         <option value="$PROJECT_DIR$/Model/adv/adv_fc.py" />
         <option value="$PROJECT_DIR$/Model/adv/adv_lstm.py" />
-        <option value="$PROJECT_DIR$/Model/README.md" />
         <option value="$PROJECT_DIR$/Model/fc.py" />
         <option value="$PROJECT_DIR$/Model/conv.py" />
+        <option value="$PROJECT_DIR$/Model/lstm.py" />
+        <option value="$PROJECT_DIR$/Model/conv_lstm.py" />
+        <option value="$PROJECT_DIR$/Model/adv_conv_lstm.py" />
+        <option value="$PROJECT_DIR$/Model/adv_conv.py" />
         <option value="$PROJECT_DIR$/Model/adv_fc.py" />
         <option value="$PROJECT_DIR$/Model/adv_lstm.py" />
-        <option value="$PROJECT_DIR$/Model/adv_conv.py" />
-        <option value="$PROJECT_DIR$/Model/adv_conv_lstm.py" />
-        <option value="$PROJECT_DIR$/Model/conv_lstm.py" />
-        <option value="$PROJECT_DIR$/Model/lstm.py" />
+        <option value="$PROJECT_DIR$/Model/README.md" />
         <option value="$PROJECT_DIR$/Model/module.py" />
       </list>
     </option>
@@ -214,7 +223,91 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.conv_lstm">
+  <component name="RunManager" selected="Python.adv_conv_lstm">
+    <configuration name="adv_conv" type="PythonConfigurationType" factoryName="Python">
+      <module name="graduation_project-" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/conv.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="adv_conv_lstm" type="PythonConfigurationType" factoryName="Python">
+      <module name="graduation_project-" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/conv_lstm.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="adv_fc" type="PythonConfigurationType" factoryName="Python">
+      <module name="graduation_project-" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/fc.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="adv_lstm" type="PythonConfigurationType" factoryName="Python">
+      <module name="graduation_project-" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/anaconda3/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Model" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Model/lstm.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="conv" type="PythonConfigurationType" factoryName="Python">
       <module name="graduation_project-" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -301,6 +394,10 @@
     </configuration>
     <list>
       <item itemvalue="Python.conv" />
+      <item itemvalue="Python.adv_fc" />
+      <item itemvalue="Python.adv_lstm" />
+      <item itemvalue="Python.adv_conv" />
+      <item itemvalue="Python.adv_conv_lstm" />
       <item itemvalue="Python.fc" />
       <item itemvalue="Python.lstm" />
       <item itemvalue="Python.conv_lstm" />
@@ -323,12 +420,12 @@
     <frame x="246" y="73" width="1283" height="877" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26545167" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26545167" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3299363" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3299363" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -368,79 +465,79 @@
     <entry file="file://$PROJECT_DIR$/Model/adv/adv_lstm.py" />
     <entry file="file://$PROJECT_DIR$/Model/adv/adv_conv.py" />
     <entry file="file://$PROJECT_DIR$/Model/adv/adv_conv_lstm.py" />
-    <entry file="file://$PROJECT_DIR$/Model/conv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1140">
-          <caret line="76" selection-start-line="76" selection-end-line="76" selection-end-column="78" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/Model/test.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/fc.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="21" column="68" selection-start-line="21" selection-start-column="68" selection-end-line="21" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/adv_lstm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="70" selection-start-line="23" selection-start-column="70" selection-end-line="23" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/adv_fc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="70" selection-start-line="24" selection-start-column="70" selection-end-line="24" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/adv_conv_lstm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="22" column="48" selection-start-line="22" selection-start-column="48" selection-end-line="22" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/adv_conv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" column="41" selection-start-line="19" selection-start-column="41" selection-end-line="19" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/lstm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" column="30" lean-forward="true" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model/conv_lstm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="69">
-          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+        <state relative-caret-position="394">
+          <caret line="76" column="45" selection-start-line="76" selection-start-column="45" selection-end-line="76" selection-end-column="45" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/README.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+        <state relative-caret-position="285">
+          <caret line="19" column="22" lean-forward="true" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model/test.py">
-      <provider selected="true" editor-type-id="text-editor" />
+    <entry file="file://$PROJECT_DIR$/Model/lstm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="163">
+          <caret line="20" column="30" lean-forward="true" selection-start-line="20" selection-start-column="30" selection-end-line="20" selection-end-column="30" />
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Model/module.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="83" column="18" selection-start-line="83" selection-start-column="18" selection-end-line="83" selection-end-column="18" />
+        <state relative-caret-position="260">
+          <caret line="57" column="20" lean-forward="true" selection-start-line="57" selection-start-column="20" selection-end-line="57" selection-end-column="20" />
           <folding>
             <element signature="e#867#890#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/adv_lstm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-694">
+          <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/conv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-559">
+          <caret line="30" column="24" lean-forward="true" selection-start-line="30" selection-start-column="24" selection-end-line="30" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/conv_lstm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-529">
+          <caret line="36" column="10" lean-forward="true" selection-start-line="36" selection-start-column="10" selection-end-line="38" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/adv_fc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-874">
+          <caret line="14" column="28" lean-forward="true" selection-start-line="14" selection-start-column="28" selection-end-line="14" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/adv_conv_lstm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-589">
+          <caret line="38" column="24" lean-forward="true" selection-start-line="38" selection-start-column="24" selection-end-line="38" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model/adv_conv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-859">
+          <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
         </state>
       </provider>
     </entry>
