@@ -6,7 +6,7 @@ CONV + LSTM으로 구현함
 ----------------------------고려 사항----------------------------
 
 '''
-from .module import *
+from module import *
 
 #CONV+LSTM을 구현
 def model(C, E, Y):

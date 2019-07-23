@@ -5,7 +5,7 @@
 
 
 '''
-from .module import *
+from module import *
 
 #FC를 구현
 def model(X, E, Y):

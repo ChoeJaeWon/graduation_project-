@@ -7,7 +7,7 @@ conv+fc로 구현함
 
 
 '''
-from .module import *
+from module import *
 
 #FC와 CNN을 합침
 def model(C, E, Y):

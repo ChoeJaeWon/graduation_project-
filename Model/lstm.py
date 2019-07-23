@@ -10,7 +10,7 @@ lstm은 input x에 이미 exogenous가 포함되어있다.
 1. exogenous도 lstm버전이 있어야한다.(즉 CELL_SIZE 따라 반복 되어야함)
 2. 기존의 lstm버전은 speed만 고려해야한다.(vector를 66개 -> 12개로 수정)
 '''
-from .module import *
+from module import *
 
 #LSTM을 구현
 def model(X, E, Y):

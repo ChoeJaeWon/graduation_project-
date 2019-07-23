@@ -5,7 +5,7 @@
 
 기존의 lstm 은 only speed 만 고려해야한다 ?? 이게 무슨 말
 '''
-from .module import *
+from module import *
 
 #LSTM을 구현
 def model(X, E, Y):
