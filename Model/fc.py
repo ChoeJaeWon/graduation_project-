@@ -39,16 +39,16 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, optimal, train_
 
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
-            print("Train Cost%d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
+            print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-            test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
+            test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, tr_idx, cr_idx)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
 
 #testing 해준다.
-def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx):
+def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, tr_idx, cr_idx):
     BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
     mae = 0.0
     mse = 0.0
@@ -64,7 +64,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         mse += cost_MSE_val
         mape += cost_MAPE_val
 
-    print("Test Cost%d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, mae/BATCH_NUM, mse/BATCH_NUM, mape/BATCH_NUM))
+    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
 
 
 
@@ -77,6 +77,7 @@ cr_idx = 0
 
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+    print('CROSS VALIDATION: %d' % cr_idx)
     S = tf.placeholder("float32", [None, TIME_STAMP])
     E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
     Y = tf.placeholder("float32", [None, 1])
