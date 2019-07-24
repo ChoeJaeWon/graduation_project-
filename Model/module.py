@@ -48,8 +48,8 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 10 #traing 회수 [default 1000] 
-SPEED_MAX = 103 #data내의 최고 속도 [default 100]
+TRAIN_NUM = 10 #traing 회수 [default 1000]
+SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 1 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
