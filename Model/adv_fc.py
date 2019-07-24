@@ -27,7 +27,7 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, train_idx, test_idx, cr_idx):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     for tr_idx in range(TRAIN_NUM):
         epoch_cost = 0.0
@@ -40,8 +40,11 @@ def train(S_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx):
             cost_MSE_val, _= sess.run([cost_MSE, train_G], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
 
-        #한 epoch당 cost_MSE의 평균을 구해준다.
-        print("Train Cost%d: %lf" % (tr_idx, epoch_cost/BATCH_NUM ))
+        # 설정 interval당 train과 test 값을 출력해준다.
+        if tr_idx % TRAIN_PRINT_INTERVAL == 0:
+            print("Train Cost%d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
+        if tr_idx % TEST_PRINT_INTERVAL == 0:
+            test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
@@ -89,8 +92,7 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     cost_MAE, cost_MSE, cost_MAPE, train_D, train_G = model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
     sess.run(tf.global_variables_initializer())
 
-    train(S_data, E_data, Y_data, cost_MSE, train_D, train_G, train_idx)
-    test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
+    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, train_idx, test_idx, cr_idx)
 
     tf.reset_default_graph()
 

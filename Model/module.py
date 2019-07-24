@@ -53,7 +53,10 @@ SPEED_MAX = 103 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 수
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
+TRAIN_PRINT_INTERVAL = 10 #train 에서 mse값 출력 간격
+TEST_PRINT_INTERVAL = 50 #test 에서 mae, mse, mape값 출력 간격
+
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
