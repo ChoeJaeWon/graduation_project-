@@ -93,3 +93,6 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     tf.reset_default_graph()
 
     cr_idx=cr_idx+1
+
+    if (cr_idx == CROSS_ITERATION_NUM):
+        break
