@@ -281,9 +281,11 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
 #ba_idx는 batch의 idx
 #cell size는 conv+lstm에서 고려해줘야할 conv의 수
 def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
+    #fc X input data와 fc, conv의 y output data
     if slice_type == 'FC':
         slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]]
 
+    #conv X input data, cell size에 따라 연속된 conv input을 뽑을수있다.(lstm의 input으로 들어가기 위한)
     elif slice_type == 'CONV':
         for cell_idx in range(cell_size):
             for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
@@ -297,7 +299,7 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
                 slice_data = temp
             else:
                 slice_data = np.append(slice_data, temp, axis=0)
-
+    #lstm X input data
     elif slice_type ==  'LSTM':
         for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
             start_idx = data_idx[idx]
@@ -305,6 +307,9 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
                 slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
             else:
                 slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1, -1), axis=1)
+    #lstm의 output data(60분 후를 뽑아야 하기때문)
+    elif slice_type == 'LSTMY':
+        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]+ CELL_SIZE-1]
 
     else:
         print('ERROR: slice type error\n')

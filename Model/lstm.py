@@ -32,7 +32,7 @@ def train(S_data, E_data, Y_data, cost_MSE, optimal, train_idx):
             #Batch Slice
             S_train = batch_slice(S_data, train_idx, ba_idx, 'LSTM', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
-            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
+            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'LSTMY', 1)
 
             cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train })
             epoch_cost += cost_MSE_val
@@ -54,7 +54,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx
         # Batch Slice
         S_test = batch_slice(S_data, test_idx, ba_idx, 'LSTM', 1)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
+        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
 
         cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test})
         mae += cost_MAE_val
