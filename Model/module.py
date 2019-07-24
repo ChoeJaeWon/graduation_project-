@@ -304,7 +304,7 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
         for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
             start_idx = data_idx[idx]
             if idx == batch_idx * BATCH_SIZE:
-                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 54이기 때문)
+                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 71이기 때문)
             else:
                 slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1, -1), axis=1)
     #lstm의 output data(60분 후를 뽑아야 하기때문)

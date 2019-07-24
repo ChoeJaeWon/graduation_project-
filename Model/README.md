@@ -1,17 +1,23 @@
 -Make 8 Type Model
-1.FC: input_type(101)
-2.CONV: input_type(011)
-3.LSTM: input_type(101)
-4.CONV+LSTM: input_type(011)
-5.FC+ADLOSS: input_type(101)
-6.CONV+ADLOSS: input_type(111)
-7.LSTM+ADLOSS: input_type(101)
-8.CONV+LSTM+ADLOSS: input_type(111)
+1. FC: input_type(101)
+2. CONV: input_type(011)
+3. LSTM: input_type(101)
+4. CONV+LSTM: input_type(011)
+5. FC+ADLOSS: input_type(101)
+6. CONV+ADLOSS: input_type(111)
+7. LSTM+ADLOSS: input_type(101)
+8. CONV+LSTM+ADLOSS: input_type(111)
 
--File Information
+- File Information
+
 module.py: header file. It has define value and model(fc, conv, lstm, adloss) function
+
 conv.py: 2.CONV file. It is constructed by CONV+FC
 
+-data type
+1. S: FC의 only speed 와 LSTM의 only speed(cell size 추가됨)
+2. C
+3. E
 
 7월 22일 commit 정리
 1. adv_conv, adv_conv_lstm, adv_fc, adv_lstm 파일 추가 
@@ -26,3 +32,4 @@ conv.py: 2.CONV file. It is constructed by CONV+FC
 3. lstm도 그래프 업데이트 해주면 좋은거 아닌가?
 4. conv lstm 은 fc 없이 가기로 한거?
 5. C 마지막에 1은 뭐지?
+
