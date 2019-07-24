@@ -40,7 +40,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, optimal, train_
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
             print("Train Cost%d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
-        if tr_idx % TEST_PRINT_INTERVAL == 0:
+        if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
             test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, cr_idx)
 
         #cross validation의 train_idx를 shuffle해준다.
