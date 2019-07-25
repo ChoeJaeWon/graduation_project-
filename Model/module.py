@@ -48,7 +48,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 10 #traing 회수 [default 1000]
+TRAIN_NUM = 15000 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -85,7 +85,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 5 #lstm의 training 수
+LSTM_TRAIN_NUM = 1500 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
