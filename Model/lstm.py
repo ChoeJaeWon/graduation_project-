@@ -24,8 +24,12 @@ def model(S, E, Y):
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, optimal, train_idx, test_idx, cr_idx):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
+    print('BATCH_NUM: %d' % BATCH_NUM)
+
+    global_step_tr = 0
+    global_step_te = 0
     for tr_idx in range(LSTM_TRAIN_NUM):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
@@ -34,21 +38,23 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, optimal, train_
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'LSTMY', 1)
 
-            cost_MSE_val, _= sess.run([cost_MSE, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train })
+            cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train })
             epoch_cost += cost_MSE_val
+            writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+            global_step_tr += 1
 
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-            test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, tr_idx, cr_idx)
+            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
 
 #testing 해준다.
-def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, tr_idx, cr_idx):
+def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test):
     BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
     mae = 0.0
     mse = 0.0
@@ -59,12 +65,19 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, tr_idx
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test})
+        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test})
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
 
+        writer_test.add_summary(cost_MAE_hist_val, global_step_te)
+        writer_test.add_summary(cost_MSE_hist_val, global_step_te)
+        writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
+
+        global_step_te += 1
+
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
+    return global_step_te
 
 
 
@@ -84,6 +97,11 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     init()
     sess = tf.Session()
     cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y)
+    writer_train = tf.summary.FileWriter("./tensorboard/lstm/train%d" % cr_idx, sess.graph)
+    writer_test = tf.summary.FileWriter("./tensorboard/lstm/test%d" % cr_idx, sess.graph)
+    cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
+    cost_MSE_hist = tf.summary.scalar('cost_MSE', cost_MSE)
+    cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
     sess.run(tf.global_variables_initializer())
 
 
