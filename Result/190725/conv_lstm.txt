@@ -1,0 +1,81 @@
+C:\Anaconda3\python.exe C:/Users/삼성/Desktop/Siyoung/2019_여름학기/graduate_programming/graduation_project-/Model/conv_lstm.py
+CROSS VALIDATION: 0
+WARNING:tensorflow:From C:\Anaconda3\lib\site-packages\tensorflow\python\framework\op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+WARNING:tensorflow:From C:\Users\삼성\Desktop\Siyoung\2019_여름학기\graduate_programming\graduation_project-\Model\module.py:224: batch_normalization (from tensorflow.python.layers.normalization) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.batch_normalization instead.
+WARNING:tensorflow:From C:\Users\삼성\Desktop\Siyoung\2019_여름학기\graduate_programming\graduation_project-\Model\module.py:248: LSTMCell.__init__ (from tensorflow.python.ops.rnn_cell_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This class is equivalent as tf.keras.layers.LSTMCell, and will be replaced by that in Tensorflow 2.0.
+WARNING:tensorflow:From C:\Users\삼성\Desktop\Siyoung\2019_여름학기\graduate_programming\graduation_project-\Model\module.py:251: static_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.RNN(cell, unroll=True)`, which is equivalent to this API
+Train Cost 0: 492.956309
+Train Cost 10: 72.707621
+Train Cost 20: 53.328327
+Train Cost 30: 44.573749
+Train Cost 40: 37.373604
+Test Cost(0) 49: MAE(6.411063) MSE(109.916095) MAPE(21.268599)
+Train Cost 50: 32.523935
+Train Cost 60: 29.579638
+Train Cost 70: 26.405483
+Train Cost 80: 25.362839
+Train Cost 90: 24.255562
+Test Cost(0) 99: MAE(5.516090) MSE(64.876254) MAPE(14.726836)
+Train Cost 100: 23.764563
+Train Cost 110: 23.246615
+Train Cost 120: 20.458322
+Train Cost 130: 18.735116
+Train Cost 140: 17.806340
+Test Cost(0) 149: MAE(3.797129) MSE(28.312021) MAPE(12.582059)
+Train Cost 150: 17.506259
+Train Cost 160: 16.721305
+Train Cost 170: 15.983995
+Train Cost 180: 15.685225
+Train Cost 190: 14.893705
+Test Cost(0) 199: MAE(4.670147) MSE(46.875270) MAPE(12.909164)
+Train Cost 200: 14.297410
+Train Cost 210: 14.092199
+Train Cost 220: 14.074869
+Train Cost 230: 13.707825
+Train Cost 240: 12.570817
+Test Cost(0) 249: MAE(3.669075) MSE(25.713503) MAPE(11.451410)
+Train Cost 250: 11.969832
+Train Cost 260: 11.927168
+Train Cost 270: 11.896903
+Train Cost 280: 11.263501
+Train Cost 290: 11.447669
+Test Cost(0) 299: MAE(5.552423) MSE(75.850066) MAPE(13.998103)
+Train Cost 300: 11.450351
+Train Cost 310: 10.749324
+Train Cost 320: 10.798082
+Train Cost 330: 10.191509
+Train Cost 340: 10.150054
+Test Cost(0) 349: MAE(3.804934) MSE(29.084739) MAPE(12.041384)
+Train Cost 350: 9.566887
+Train Cost 360: 9.794126
+Train Cost 370: 9.100968
+Train Cost 380: 9.443121
+Train Cost 390: 9.668143
+Test Cost(0) 399: MAE(3.707240) MSE(26.504870) MAPE(11.631055)
+Train Cost 400: 9.172816
+Train Cost 410: 8.789444
+Train Cost 420: 8.709764
+Train Cost 430: 8.709151
+Train Cost 440: 8.548589
+Test Cost(0) 449: MAE(3.837982) MSE(28.536601) MAPE(11.829228)
+Train Cost 450: 8.265677
+Train Cost 460: 8.096035
+Train Cost 470: 8.459450
+Train Cost 480: 7.939111
+Train Cost 490: 8.316202
+Test Cost(0) 499: MAE(3.824015) MSE(28.572527) MAPE(11.938519)
+Train Cost 500: 8.037877
+Train Cost 510: 7.744043
+Train Cost 520: 10.097999
+Train Cost 530: 7.688702
+Train Cost 540: 7.608457
+Test Cost(0) 549: MAE(4.095204) MSE(33.869088) MAPE(12.561858)
+Train Cost 550: 8.444477
