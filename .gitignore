@@ -4,3 +4,4 @@ Model/.idea/
 Model/__pycache__/
 Result/
 Model/tensorboard/
+Save/
