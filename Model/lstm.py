@@ -11,7 +11,7 @@ lstm은 input x에 이미 exogenous가 포함되어있다.
 2. 기존의 lstm버전은 speed만 고려해야한다.(vector를 66개 -> 12개로 수정)
 '''
 from module import *
-
+import os
 #LSTM을 구현
 def model(S, E, Y):
     layer = LSTM_model(S, E)
@@ -24,10 +24,11 @@ def model(S, E, Y):
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
-
+    for _ in range(start_from):
+        np.random.shuffle(train_idx)
     global_step_tr = 0
     global_step_te = 0
     for tr_idx in range(LSTM_TRAIN_NUM):
@@ -48,6 +49,13 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             train_result.append(epoch_cost/BATCH_NUM)
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
+
+            print("Saving network...")
+            sess.run(last_epoch.assign(tr_idx + 1))
+            if not os.path.exists(CURRENT_POINT_DIR):
+                os.makedirs(CURRENT_POINT_DIR)
+            saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+
             global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
         #cross validation의 train_idx를 shuffle해준다.
@@ -99,6 +107,7 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     S = tf.placeholder("float32", [CELL_SIZE, None, TIME_STAMP]) #cell_size, batch_size
     E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM]) #cell_size, batch_size
     Y = tf.placeholder("float32", [None, 1])
+    last_epoch = tf.Variable(0, name=LAST_EPOCH_NAME)
 
     init()
     sess = tf.Session()
@@ -110,8 +119,25 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
     sess.run(tf.global_variables_initializer())
 
+    # Saver and Restore
+    saver = tf.train.Saver()
+    CURRENT_POINT_DIR = CHECK_POINT_DIR + "LSTM_" + str(cr_idx) + "/"
+    checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
-    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result)
+    if checkpoint and checkpoint.model_checkpoint_path:
+        try:
+            saver.restore(sess, checkpoint.model_checkpoint_path)
+            print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        except:
+            print("Error on loading old network weights")
+    else:
+        print("Could not find old network weights")
+
+    start_from = sess.run(last_epoch)
+    # train my model
+    print('Start learning from:', start_from)
+
+    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result,  CURRENT_POINT_DIR, start_from)
 
     tf.reset_default_graph()
 
