@@ -33,3 +33,7 @@ conv.py: 2.CONV file. It is constructed by CONV+FC
 4. conv lstm 은 fc 없이 가기로 한거?
 5. C 마지막에 1은 뭐지?
 
+7월 25일 commit 정리
+1. 텐서보드 연동
+2. 아웃풋 파일 만들기 (csv)
+3. 데이터 자동 저장 및 선택 복구
