@@ -9,8 +9,10 @@ Y = np.array([2, 3])
 
 kf = KFold(n_splits=4, shuffle=True)
 for train_index, test_index in kf.split(X):
-    print("TRAIN:", train_index, "TEST:", test_index)
-    print("TRAIN:", train_index+1, "TEST:", test_index+4)
+    for _ in range(4):
+        print("TRAIN:", train_index, "TEST:", test_index)
+        np.random.shuffle(train_index)
+
 
 
 #print(0b1111& 0b1000)

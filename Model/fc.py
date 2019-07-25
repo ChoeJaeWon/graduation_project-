@@ -1,7 +1,7 @@
 '''
 ----------------------------코드 설명----------------------------
 -C-
-3.FC에 해당하는 코드로
+1.FC에 해당하는 코드로
 fc를 구현함
 ----------------------------고려 사항----------------------------
 
@@ -24,7 +24,7 @@ def model(S, E, Y, BA, DR):
     return cost_MAE, cost_MSE, cost_MAPE, optimal
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
 
@@ -45,16 +45,17 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
+            train_result.append(epoch_cost/BATCH_NUM)
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test)
+            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
 
 #testing 해준다.
-def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test):
+def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
     BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
     mae = 0.0
     mse = 0.0
@@ -76,7 +77,9 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
         global_step_te+=1
 
+    test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
+
     return global_step_te
 
 
@@ -91,6 +94,10 @@ cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     print('CROSS VALIDATION: %d' % cr_idx)
+
+    train_result = []
+    test_result = []
+
     S = tf.placeholder("float32", [None, TIME_STAMP])
     E = tf.placeholder("float32", [None, EXOGENOUS_NUM])
     Y = tf.placeholder("float32", [None, 1])
@@ -108,9 +115,11 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
     sess.run(tf.global_variables_initializer())
 
-    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test)
+    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result)
 
     tf.reset_default_graph()
+
+    output_data(train_result, test_result, 'fc', cr_idx)
 
     cr_idx = cr_idx + 1
 

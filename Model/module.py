@@ -48,7 +48,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 
 #variable
-TRAIN_NUM = 500 #traing 회수 [default 1000]
+TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -319,3 +319,26 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
         print('ERROR: slice type error\n')
 
     return slice_data
+
+#train과 test에서 얻은 결과를 file로 만든다.
+#file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
+def output_data(train_result, test_result, file_name, cr_idx):
+    #train output
+    outputfile = open('../Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    output = csv.writer(outputfile)
+
+    for tr_idx in range(len(train_result)):
+        output.writerow([str(train_result[tr_idx])])
+
+    outputfile.close()
+
+    # test output
+    outputfile = open('../Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    output = csv.writer(outputfile)
+
+    for te_idx in range(len(test_result)):
+        output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
+
+    outputfile.close()
+
+
