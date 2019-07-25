@@ -58,7 +58,7 @@ CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아�
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 10 #train 에서 mse값 출력 간격
-TEST_PRINT_INTERVAL = 50 #test 에서 mae, mse, mape값 출력 간격
+TEST_PRINT_INTERVAL = 20 #test 에서 mae, mse, mape값 출력 간격
 
 
 #Hyper Parameter(FC)
@@ -87,7 +87,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 1500 #lstm의 training 수
+LSTM_TRAIN_NUM = 10 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
