@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="079daad2-5bdc-4cc1-8855-0af7bc8581bc" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adv_conv.py" beforeDir="false" afterPath="$PROJECT_DIR$/adv_conv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adv_conv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/adv_conv_lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adv_fc.py" beforeDir="false" afterPath="$PROJECT_DIR$/adv_fc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/adv_lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conv.py" beforeDir="false" afterPath="$PROJECT_DIR$/conv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conv_lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/conv_lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fc.py" beforeDir="false" afterPath="$PROJECT_DIR$/fc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/lstm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/module.py" beforeDir="false" afterPath="$PROJECT_DIR$/module.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tensorboard/adv_fc/test0/events.out.tfevents.1564028956.choejaewon-ui-MacBook-Air.local" beforeDir="false" afterPath="$PROJECT_DIR$/tensorboard/adv_fc/test0/events.out.tfevents.1564028956.choejaewon-ui-MacBook-Air.local" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tensorboard/adv_fc/train0/events.out.tfevents.1564028955.choejaewon-ui-MacBook-Air.local" beforeDir="false" afterPath="$PROJECT_DIR$/tensorboard/adv_fc/train0/events.out.tfevents.1564028955.choejaewon-ui-MacBook-Air.local" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-    </list>
+    <list default="true" id="079daad2-5bdc-4cc1-8855-0af7bc8581bc" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +68,7 @@
         <entry file="file://$PROJECT_DIR$/adv_conv.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="130">
-              <caret line="119" column="59" lean-forward="true" selection-start-line="119" selection-start-column="59" selection-end-line="119" selection-end-column="59" />
+              <caret line="119" column="59" selection-start-line="119" selection-start-column="59" selection-end-line="119" selection-end-column="59" />
             </state>
           </provider>
         </entry>
@@ -90,8 +76,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="13" column="38" selection-start-line="13" selection-start-column="38" selection-end-line="13" selection-end-column="38" />
+            <state relative-caret-position="240">
+              <caret line="16" selection-start-line="16" selection-end-line="16" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -362,12 +348,12 @@
     <frame x="0" y="23" width="1440" height="877" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1627907" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1627907" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.3923567" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3923567" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3987261" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -521,7 +507,7 @@
     <entry file="file://$PROJECT_DIR$/adv_conv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="130">
-          <caret line="119" column="59" lean-forward="true" selection-start-line="119" selection-start-column="59" selection-end-line="119" selection-end-column="59" />
+          <caret line="119" column="59" selection-start-line="119" selection-start-column="59" selection-end-line="119" selection-end-column="59" />
         </state>
       </provider>
     </entry>
@@ -544,8 +530,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="38" selection-start-line="13" selection-start-column="38" selection-end-line="13" selection-end-column="38" />
+        <state relative-caret-position="240">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
