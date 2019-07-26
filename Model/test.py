@@ -15,4 +15,5 @@ for train_index, test_index in kf.split(X):
 
 
 
+
 #print(0b1111& 0b1000)

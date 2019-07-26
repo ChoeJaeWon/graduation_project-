@@ -49,6 +49,9 @@ FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파�
 CHECK_POINT_DIR = '../Save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 
+#FLAG
+RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+
 #variable
 TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100] 

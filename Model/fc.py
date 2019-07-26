@@ -130,14 +130,15 @@ for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_" + str(cr_idx) + "/"
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
-    if checkpoint and checkpoint.model_checkpoint_path:
-        try:
-            saver.restore(sess, checkpoint.model_checkpoint_path)
-            print("Successfully loaded:", checkpoint.model_checkpoint_path)
-        except:
-            print("Error on loading old network weights")
-    else:
-        print("Could not find old network weights")
+    if RESTORE_FLAG:
+        if checkpoint and checkpoint.model_checkpoint_path:
+            try:
+                saver.restore(sess, checkpoint.model_checkpoint_path)
+                print("Successfully loaded:", checkpoint.model_checkpoint_path)
+            except:
+                print("Error on loading old network weights")
+        else:
+            print("Could not find old network weights")
 
     start_from = sess.run(last_epoch)
     # train my model
