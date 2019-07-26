@@ -9,3 +9,5 @@ Model/tensorboard/
 Model/save/
 1DConvLSTM_Model/tensorboard/
 1DConvLSTM_Model/save/
+GAN_Model/tensorboard/
+GAN_Model/save/
