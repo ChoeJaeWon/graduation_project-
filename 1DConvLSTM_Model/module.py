@@ -42,11 +42,11 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 
 #Setting
 #File name
-FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/Exogenous/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_SPEED = '../Data/SpeedLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_SPEED_LSTM = '../Data/SpeedLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라내고 Timestamp가 1인 파일 이름(X data)
-FILEX_EXO_LSTM = '../Data/ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv' #exogenous(data 8)만 잘라내고 Timestamp가 1인 파일 이름(X data)
-FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
+FILEX_EXO_LSTM = '../Data/ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라내고 Timestamp가 1인 파일 이름(X data)
+FILEX_CONV = '../Data/SpeedConv/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
@@ -81,18 +81,17 @@ FC_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 POOLING = False #pooling을 사용할 것인지 [default True]
 CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
 CONV_LAYER_NUM = 3 #conv layer의 깊이 [default 3]
-TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
+TEMPORAL_NUM = 1 #conv에서 고려할 시간 default 12]
 UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
 DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
 CHANNEL_NUM = [1, 64, 16, 32] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
-FILTER_SIZE_TEMPORAL = [3, 1, 3] #시간의 filter size [default 3 1 3]
+FILTER_SIZE_TEMPORAL = [1, 1, 1] #시간의 filter size [default 3 1 3]
 FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
-LAST_LAYER_SIZE = 8
+LAST_LAYER_SIZE = 1 #conv의 마지막 Layer의 unit 개수
 
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 10 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]

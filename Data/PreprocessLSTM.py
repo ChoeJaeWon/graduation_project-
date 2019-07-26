@@ -37,4 +37,4 @@ make_outputFileSpeed(text_list, 'SpeedLSTM/LSTMx_data_2016204_5min_60min_60min_o
 
 #make ExogenousLSTM
 text_list = make_fileTo_list('Exogenous/x_data_2016204_5min_60min_60min_8.csv')
-make_outputFileExogenous(text_list, 'ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv')
+make_outputFileExogenous(text_list, 'ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_8.csv')

@@ -5,6 +5,7 @@ import errno
 sequence_size = 1 #sequence size, if sequence_size is 1 it will be used for conv itself not a conv-lstm
 m = 2  #s - m to s  and s to s + m  ==spatial size
 spatial_size = m*2 + 1 #for convolution matrix
+temporal_size = 1 #for convolution matrix
 
 result_dir_conv = 'preprocess_conv/' #if sequence is 1
 result_dir_conv_lstm = 'preprocess_conv_lstm/' #if sequence is more than 1
@@ -31,7 +32,7 @@ def make_fileTo_list(file): #build list of links
     File = open(file, 'r')
     FileData = csv.reader(File)
     for file_line in FileData:
-        text_list.append(file_line)
+        text_list.append(file_line[-temporal_size:])
     File.close()
 
     return text_list
