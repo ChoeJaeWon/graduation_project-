@@ -4,6 +4,12 @@ import tensorflow as tf
 
 np.random.seed(77)
 
+a = [1, 2]
+b = [1]
+
+b = b[0:]+a
+print(b)
+
 X = np.array([1, 2,3, 4])
 Y = np.array([2, 3])
 
