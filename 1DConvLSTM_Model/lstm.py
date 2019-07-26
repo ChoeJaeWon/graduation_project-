@@ -93,7 +93,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 
 ###################################################-MAIN-###################################################
-S_data, _, E_data,Y_data= input_data(0b101)
+S_data, _, E_data,Y_data= input_data(0b101, True)
 
 
 cr_idx = 0
