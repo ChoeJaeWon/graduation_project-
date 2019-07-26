@@ -86,7 +86,7 @@ def test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE
         E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, C:C_test, E:E_test, Y:Y_test, BA: True, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
+        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, C:C_test, E:E_test, Y:Y_test, BA: False, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
         mae += cost_MAE_val
         mse += cost_MSE_val
         mape += cost_MAPE_val
