@@ -3,5 +3,9 @@
 Model/.idea/
 Model/__pycache__/
 Result/
+
+#Model tensorboard, save ignore
 Model/tensorboard/
-Save/
+Model/save/
+1DConvLSTM_Model/tensorboard/
+1DConvLSTM_Model/save/
