@@ -31,7 +31,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         np.random.shuffle(train_idx)
     global_step_tr = 0
     global_step_te = 0
-    for tr_idx in range(start_from, LSTM_TRAIN_NUM):
+    for tr_idx in range(start_from, TRAIN_NUM):
         epoch_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
@@ -93,7 +93,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 
 ###################################################-MAIN-###################################################
-S_data, _, E_data,Y_data= input_data(0b101)
+S_data, _, E_data,Y_data= input_data(0b101, True)
 
 
 cr_idx = 0

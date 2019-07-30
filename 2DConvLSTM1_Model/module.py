@@ -42,9 +42,11 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 
 #Setting
 #File name
-FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/Exogenous/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
-FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
+FILEX_SPEED = '../Data/SpeedLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_SPEED_LSTM = '../Data/SpeedLSTM/LSTMx_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라내고 Timestamp가 1인 파일 이름(X data)
+FILEX_EXO_LSTM = '../Data/ExogenousLSTM/LSTMx_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라내고 Timestamp가 1인 파일 이름(X data)
+FILEX_CONV = '../Data/SpeedConv/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
@@ -53,21 +55,21 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 RESTORE_FLAG = False #weight 불러오기 여부 [default False]
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 1500 #traing 회수 [default 1000]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
-TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
-TEST_PRINT_INTERVAL = 2 #test 에서 mae, mse, mape값 출력 간격
+TRAIN_PRINT_INTERVAL = 10 #train 에서 mse값 출력 간격
+TEST_PRINT_INTERVAL = 50 #test 에서 mae, mse, mape값 출력 간격
 
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
-VECTOR_SIZE = 83 #fc와 lstm에 들어가는 vector의 크기 [default 83]
-TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
+TIME_STAMP = 1 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
+VECTOR_SIZE = 23+TIME_STAMP*5 #fc와 lstm에 들어가는 vector의 크기 [default 83]
 EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
 LAYER_UNIT_NUM = [VECTOR_SIZE, 256, 128, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
@@ -79,18 +81,17 @@ FC_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 POOLING = False #pooling을 사용할 것인지 [default True]
 CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
 CONV_LAYER_NUM = 3 #conv layer의 깊이 [default 3]
-TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
+TEMPORAL_NUM = 1 #conv에서 고려할 시간 default 12]
 UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
 DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
 CHANNEL_NUM = [1, 64, 16, 32] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
-FILTER_SIZE_TEMPORAL = [3, 1, 3] #시간의 filter size [default 3 1 3]
+FILTER_SIZE_TEMPORAL = [1, 1, 1] #시간의 filter size [default 3 1 3]
 FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
-LAST_LAYER_SIZE = 8
+LAST_LAYER_SIZE = 1 #conv의 마지막 Layer의 unit 개수
 
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 10 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
@@ -163,18 +164,24 @@ def fileToData(fileName):
 
 #input data를 만들어줌
 #type 2진법 ex) 0b111 4자리는 Speed, 2자리는 Conv, 1자리는 exogenous
-def input_data(type):
+def input_data(type, lstm=False):
     S_data = np.array([])
     C_data = np.array([])
     E_data = np.array([])
     #file을 numpy로 바꿔줌
     #&로 각 자리를 비교해준다.
     if type & 0b100 != False:
-        S_data = fileToData(FILEX_SPEED) #only speed 데이터(시간순)
+        if lstm == True:
+            S_data = fileToData(FILEX_SPEED_LSTM)
+        else:
+            S_data = fileToData(FILEX_SPEED) #only speed 데이터(시간순)
     if type & 0b10 != False:
         C_data = fileToData(FILEX_CONV) #conv 데이터(행(공간), 열(시간))
     if type & 0b1 != False:
-        E_data = fileToData(FILEX_EXO)  # 외부요소만 자른 데이터
+        if lstm == True:
+            E_data = fileToData(FILEX_EXO_LSTM)
+        else:
+            E_data = fileToData(FILEX_EXO)  # 외부요소만 자른 데이터
     Y_data = fileToData(FILEY) #실재값 데이터
 
     return S_data, C_data, E_data, Y_data
