@@ -81,14 +81,14 @@ FC_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 POOLING = False #pooling을 사용할 것인지 [default True]
 CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
 CONV_LAYER_NUM = 3 #conv layer의 깊이 [default 3]
-TEMPORAL_NUM = 1 #conv에서 고려할 시간 default 12]
+TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
 UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
 DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
 CHANNEL_NUM = [1, 64, 16, 32] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
-FILTER_SIZE_TEMPORAL = [1, 1, 1] #시간의 filter size [default 3 1 3]
+FILTER_SIZE_TEMPORAL = [3, 1, 3] #시간의 filter size [default 3 1 3]
 FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
-LAST_LAYER_SIZE = 1 #conv의 마지막 Layer의 unit 개수
+LAST_LAYER_SIZE = 8 #conv의 마지막 Layer의 unit 개수
 
 
 #Hyper Parameter(LSTM)
