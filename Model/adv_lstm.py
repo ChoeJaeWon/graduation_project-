@@ -19,8 +19,8 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(adv_g, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)))
     loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
-    train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D)
-    train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G)
+    train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[discriminator_weights])
+    train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[lstm_weights, lstm_biases])
 
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
