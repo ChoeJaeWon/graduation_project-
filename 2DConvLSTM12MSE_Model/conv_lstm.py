@@ -104,7 +104,7 @@ S_data , C_data, E_data,Y_data= input_data(0b111)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
-for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE*2]):
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
