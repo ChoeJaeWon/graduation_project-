@@ -7,7 +7,15 @@ Result/
 #Model tensorboard, save ignore
 Model/tensorboard/
 Model/save/
+
 1DConvLSTM_Model/tensorboard/
 1DConvLSTM_Model/save/
+2DConvLSTM1_Model/tensorboard/
+2DConvLSTM1_Model/save/
+2DConvLSTM1MSE_Model/tensorboard/
+2DConvLSTM1MSE_Model/save/
+2DConvLSTM256_Model/tensorboard/
+2DConvLSTM256_Model/save/
+
 GAN_Model/tensorboard/
 GAN_Model/save/
