@@ -39,3 +39,6 @@
 ## 7월 30일 MAX_SPEED, MIN_SPEED
 - ConvLSTM 실험들 까지는 MAX_SPEED = 103, MIN_SPEED = 3으로 썼음
 - GAN실험부터는 MAX_SPEED = 98, MIN_SPEED = 3으로 실험함
+
+## 7월 30일 Y data 가 65분 후에 대응됨
+-이후의 실험 진행 전에 Y data 첫값 추가하고 마지막값 삭제 해야함

@@ -16,6 +16,8 @@ Model/save/
 2DConvLSTM1MSE_Model/save/
 2DConvLSTM256_Model/tensorboard/
 2DConvLSTM256_Model/save/
+2DConvLSTM12MSE_Model/tensorboard/
+2DConvLSTM12MSE_Model/save/
 
 GAN_Model/tensorboard/
 GAN_Model/save/
