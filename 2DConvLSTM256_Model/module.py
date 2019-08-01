@@ -53,15 +53,15 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 RESTORE_FLAG = False #weight 불러오기 여부 [default False]
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 1500 #traing 회수 [default 1500]
 SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
-TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
-TEST_PRINT_INTERVAL = 2 #test 에서 mae, mse, mape값 출력 간격
+TRAIN_PRINT_INTERVAL = 10 #train 에서 mse값 출력 간격
+TEST_PRINT_INTERVAL = 50 #test 에서 mae, mse, mape값 출력 간격
 
 
 #Hyper Parameter(FC)
@@ -232,7 +232,6 @@ def CNN_model(X, BA):
             layer = tf.nn.avg_pool(layer, ksize=[1,2,2,1], strides=[1,1,1,1])
 
     layer = tf.reshape(layer, shape=[BATCH_SIZE, CHANNEL_NUM[CONV_LAYER_NUM]*LAST_LAYER_SIZE])
-    layer = tf.matmul(layer, convfc_weights[0])
     layer = tf.nn.relu(layer)
 
     #**fc 하나 추가해 주어야함
