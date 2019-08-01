@@ -35,3 +35,7 @@
 1. 텐서보드 연동
 2. 아웃풋 파일 만들기 (csv)
 3. 데이터 자동 저장 및 선택 복구
+
+## 7월 30일 MAX_SPEED, MIN_SPEED
+- ConvLSTM 실험들 까지는 MAX_SPEED = 103, MIN_SPEED = 3으로 썼음
+- GAN실험부터는 MAX_SPEED = 98, MIN_SPEED = 3으로 실험함
