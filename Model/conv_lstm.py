@@ -14,7 +14,7 @@ def model(C, E, Y, BA):
         if idx == 0:
             layer = tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])
         else:
-            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
+            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
     layer = LSTM_model(layer, E)
 
     cost_MAE = MAE(Y, layer)
