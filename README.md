@@ -12,6 +12,13 @@
 - module.py: header file. It has define value and model(fc, conv, lstm, adloss) function
 - conv.py: 2.CONV file. It is constructed by CONV+FC
 
+## Batch normalization
+- Batch normalization 의 변수들은 tf.variables와는 다르게 직접 reuse를 설정해 줘야 그래프가 계속 생성되지 않는다.
+- trainable variables 에는 moving mean 과 moving variance가 포함되지 않는다. (global variables)
+- trainable variable 만 학습해도 moving mean 과 moving variance는 업데이트 된다.
+- 그렇게 하기 위해서는, update_ops 를 불러줘야한다.
+- update_ops 또한, 업데이트 해주고 싶은 부분만 scope를 따로 불러서 지정해줘야 한다. 그렇지 않으면 매번 모든 variable이 업데이트 된다. 소름..
+
 ## data type
 1. S: FC의 only speed 와 LSTM의 only speed(cell size 추가됨)
 2. C
@@ -41,4 +48,8 @@
 - GAN실험부터는 MAX_SPEED = 98, MIN_SPEED = 3으로 실험함
 
 ## 7월 30일 Y data 가 65분 후에 대응됨
--이후의 실험 진행 전에 Y data 첫값 추가하고 마지막값 삭제 해야함
+- 이후의 실험 진행 전에 Y data 첫값 추가하고 마지막값 삭제 해야함
+
+## 8월 4일 commit 정리
+1. naming rule of boolean variable. REUSE -> isReuse 
+2. adv 파일들 discriminator loss와 generator loss 독립적으로 학습

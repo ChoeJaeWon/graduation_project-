@@ -16,13 +16,21 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     cost_MAPE = MAPE(Y, layer)
     adv_y = tf.concat([S, Y], axis=1)
     adv_g = tf.concat([S, layer], axis=1)
-    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)))
-    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
+    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
-    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    with tf.control_dependencies(update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[discriminator_weights])
-        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[fc_weights])
+    vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope='discriminator_fc')
+    vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope='generator_fc')
+
+    D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
+    with tf.control_dependencies(D_update_ops):
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[vars_D, discriminator_weights])
+
+    G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
+    with tf.control_dependencies(G_update_ops):
+        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[vars_G, fc_weights])
 
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 

@@ -194,8 +194,8 @@ def MAPE(y_test, y_pred):
 
 
 #FC_model로 input으로 CNN output이 output으로 예측 속도값이 나온다.
-def FC_model(S, E, BA, DR, REUSE =False):
-    with tf.variable_scope('generator_fc', reuse=REUSE):
+def FC_model(S, E, BA, DR, isReuse =False):
+    with tf.variable_scope('generator_fc', reuse=isReuse):
         batch_prob = BA
         dropout_prob = DR
         for layer_idx in range(FC_LAYER_NUM):
@@ -216,8 +216,8 @@ def FC_model(S, E, BA, DR, REUSE =False):
 
 
 #CONV network로 input으로 시공간 입력이 output으로 layer가 나온다
-def CNN_model(X, BA, REUSE = False):
-    with tf.variable_scope('generator_conv', reuse=REUSE):
+def CNN_model(X, BA, isReuse = False):
+    with tf.variable_scope('generator_conv', reuse=isReuse):
         batch_prob = BA
 
         for layer_idx in range(CONV_LAYER_NUM):
@@ -246,8 +246,8 @@ def CNN_model(X, BA, REUSE = False):
 #추후에 실험 1,2 해봐야함
 #실험1: time stamp 1, vector_size 6?7?, cell_size 12, output 1
 #실험2: time stamp 12, vector_size 66, cell_size 12, output 12
-def LSTM_model(S, E, REUSE = False):
-    with tf.variable_scope('generator_conv', reuse=REUSE):
+def LSTM_model(S, E, isReuse = False):
+    with tf.variable_scope('generator_lstm', reuse=isReuse):
         # 66(vector_size) * 12(cell size)를 나눠줌
         #X,E는 같은 시간 끼리 합쳐줌
         x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
@@ -262,27 +262,27 @@ def LSTM_model(S, E, REUSE = False):
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
 
 #discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 S랑 다름 -> 매우 중요
-def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
-    discriminator_batch_prob = DISCRIMINATOR_BA
-    discriminator_dropout_prob = DISCRIMINATOR_DR
+def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, isReuse = False):
 
+    with tf.variable_scope('discriminator_fc', reuse=isReuse):
+        discriminator_batch_prob = DISCRIMINATOR_BA
+        discriminator_dropout_prob = DISCRIMINATOR_DR
+        for layer_idx in range(DISCRIMINATOR_LAYER_NUM): #same as FC_LAYER_NUM
+            if layer_idx != 0:
+                layer = tf.matmul(layer, discriminator_weights[layer_idx])
+            else:
+                layer = tf.matmul(tf.concat([X, E], axis=1), discriminator_weights[layer_idx])
 
-    for layer_idx in range(DISCRIMINATOR_LAYER_NUM): #same as FC_LAYER_NUM
-        if layer_idx != 0:
-            layer = tf.matmul(layer, discriminator_weights[layer_idx])
-        else:
-            layer = tf.matmul(tf.concat([X, E], axis=1), discriminator_weights[layer_idx])
+            if DISCRIMINATOR_BATCH_NORM == True:
+                layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
+            # 마지막 레이어는 Sigmoid logistic regression, 마지막 출력이 1이라는 가정 하에 작성합니다
+            if layer_idx == DISCRIMINATOR_LAYER_NUM - 1:
+                layer = tf.nn.sigmoid(layer)
+            else:
+                layer = tf.nn.relu(layer)
 
-        if DISCRIMINATOR_BATCH_NORM == True:
-            layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
-        # 마지막 레이어는 Sigmoid logistic regression, 마지막 출력이 1이라는 가정 하에 작성합니다
-        if layer_idx == DISCRIMINATOR_LAYER_NUM - 1:
-            layer = tf.nn.sigmoid(layer)
-        else:
-            layer = tf.nn.relu(layer)
-
-        if DISCRIMINATOR_DROPOUT == True:
-            tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
+            if DISCRIMINATOR_DROPOUT == True:
+                tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
 
     return layer
 
