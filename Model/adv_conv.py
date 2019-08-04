@@ -24,12 +24,13 @@ def model(S, C, E, Y, BA, DR, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='discriminator_fc')
     vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='generator_conv')
+                               scope='generator_conv') + tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                               scope='generator_fc')
 
     D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
     with tf.control_dependencies(D_update_ops):
         train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[vars_D, discriminator_weights])
-    G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_conv')
+    G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_conv') +  tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
     with tf.control_dependencies(G_update_ops):
         train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[vars_G, convfc_weights, conv_weights])
 
