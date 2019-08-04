@@ -53,3 +53,4 @@
 ## 8월 4일 commit 정리
 1. naming rule of boolean variable. REUSE -> isReuse 
 2. adv 파일들 discriminator loss와 generator loss 독립적으로 학습
+3. dropout 지금까지 계산이 안되고 있었고, 현재 연구가 잘 진행 중이므로 일단 보류. 
