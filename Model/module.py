@@ -209,8 +209,8 @@ def FC_model(S, E, BA, DR, isReuse =False):
 
             layer = tf.nn.relu(layer)
 
-            if FC_DROPOUT == True:
-                layer = tf.nn.dropout(layer, keep_prob=dropout_prob)
+            #if FC_DROPOUT == True:
+                #layer = tf.nn.dropout(layer, keep_prob=dropout_prob)
 
         return layer
 
@@ -281,8 +281,8 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, isReuse = Fals
             else:
                 layer = tf.nn.relu(layer)
 
-            if DISCRIMINATOR_DROPOUT == True:
-                layer = tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
+            #if DISCRIMINATOR_DROPOUT == True:
+                #layer = tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
 
     return layer
 
