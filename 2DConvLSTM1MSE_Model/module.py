@@ -36,6 +36,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
 import csv
+import os
 
 np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
 tf.set_random_seed(777) #tf.random의 seed 설정
@@ -65,7 +66,7 @@ WEEK_NUM = 4
 
 #variable
 TRAIN_NUM = 1500 #traing 회수 [default 1000]
-SPEED_MAX = 103 #data내의 최고 속도 [default 100] 
+SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
@@ -305,6 +306,43 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
 #da_idx는 cross validation해서 나온 idx의 집합
 #ba_idx는 batch의 idx
 #cell size는 conv+lstm에서 고려해줘야할 conv의 수
+def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
+    #fc X input data와 fc, conv의 y output data
+    if slice_type == 'FC':
+        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]]
+
+    #conv X input data, cell size에 따라 연속된 conv input을 뽑을수있다.(lstm의 input으로 들어가기 위한)
+    elif slice_type == 'CONV':
+        for cell_idx in range(cell_size):
+            for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
+                start_idx = data_idx[idx]
+                if idx == batch_idx * BATCH_SIZE:
+                    temp = data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
+                else:
+                    temp = np.append(temp, data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=1)
+
+            if cell_idx == 0:
+                slice_data = temp
+            else:
+                slice_data = np.append(slice_data, temp, axis=0)
+    #lstm X input data
+    elif slice_type ==  'LSTM':
+        for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
+            start_idx = data_idx[idx]
+            if idx == batch_idx * BATCH_SIZE:
+                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 71이기 때문)
+            else:
+                slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1, -1), axis=1)
+    #lstm의 output data(60분 후를 뽑아야 하기때문)
+    elif slice_type == 'LSTMY':
+        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]+ CELL_SIZE-1]
+
+    else:
+        print('ERROR: slice type error\n')
+
+    return slice_data
+
+
 def Week_CrossValidation():
     present_idx = 0
     train_idx = [[], [], [], []]
@@ -318,9 +356,6 @@ def Week_CrossValidation():
             next_idx = present_idx + ONE_DAY
         for cross_idx in range(WEEK_NUM):
             train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
-
-        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
-
         present_idx = next_idx
 
 
@@ -332,8 +367,6 @@ def Week_CrossValidation():
                     test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
                 else:
                     train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
-            print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
-
             present_idx = next_idx
 
 
@@ -344,22 +377,21 @@ def Week_CrossValidation():
             next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288
         for  cross_idx in range(WEEK_NUM):
             train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx)]
-        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
-
         present_idx = next_idx
 
     return zip(np.array(train_idx), np.array(test_idx))
 
 
 
-
 #train과 test에서 얻은 결과를 file로 만든다.
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
 def output_data(train_result, test_result, file_name, cr_idx):
-    #train output
+
+    # train output
     if not (os.path.isdir(RESULT_DIR)):
         os.makedirs(os.path.join(RESULT_DIR))
 
+    #train output
     outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
