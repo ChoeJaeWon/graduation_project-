@@ -50,9 +50,18 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
+RESULT_DIR = './Result/'
 
 #FLAG
 RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+
+#Fix value(Week Cross Validation)
+DAY = [-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+FIRST_MONTH = 7
+LAST_MONTH = 10
+ONE_DAY = 288
+ONE_WEEK = ONE_DAY * 7
+WEEK_NUM = 4
 
 #variable
 TRAIN_NUM = 1500 #traing 회수 [default 1000]
@@ -296,47 +305,62 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
 #da_idx는 cross validation해서 나온 idx의 집합
 #ba_idx는 batch의 idx
 #cell size는 conv+lstm에서 고려해줘야할 conv의 수
-def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
-    #fc X input data와 fc, conv의 y output data
-    if slice_type == 'FC':
-        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]]
+def Week_CrossValidation():
+    present_idx = 0
+    train_idx = [[], [], [], []]
+    test_idx = [[], [], [], []]
 
-    #conv X input data, cell size에 따라 연속된 conv input을 뽑을수있다.(lstm의 input으로 들어가기 위한)
-    elif slice_type == 'CONV':
-        for cell_idx in range(cell_size):
-            for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
-                start_idx = data_idx[idx]
-                if idx == batch_idx * BATCH_SIZE:
-                    temp = data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1)
+    for month_idx in range(FIRST_MONTH, LAST_MONTH+1):
+        #1일 부터 2일 전까지 데이터
+        if month_idx == FIRST_MONTH:
+            next_idx = present_idx + ONE_DAY-11
+        else:
+            next_idx = present_idx + ONE_DAY
+        for cross_idx in range(WEEK_NUM):
+            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+
+        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
+
+        present_idx = next_idx
+
+
+        #4주차 고려
+        for week_idx in range(WEEK_NUM):
+            next_idx = present_idx + ONE_WEEK
+            for cross_idx in range(WEEK_NUM):
+                if cross_idx == week_idx:
+                    test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
                 else:
-                    temp = np.append(temp, data[(start_idx + cell_idx) * SPARTIAL_NUM: ((start_idx + cell_idx + 1) * SPARTIAL_NUM)].reshape(1, 1, SPARTIAL_NUM, TEMPORAL_NUM, 1), axis=1)
+                    train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+            print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
 
-            if cell_idx == 0:
-                slice_data = temp
-            else:
-                slice_data = np.append(slice_data, temp, axis=0)
-    #lstm X input data
-    elif slice_type ==  'LSTM':
-        for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
-            start_idx = data_idx[idx]
-            if idx == batch_idx * BATCH_SIZE:
-                slice_data = data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1 , -1) #마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 71이기 때문)
-            else:
-                slice_data = np.append(slice_data,  data[start_idx: start_idx + CELL_SIZE].reshape(CELL_SIZE, 1, -1), axis=1)
-    #lstm의 output data(60분 후를 뽑아야 하기때문)
-    elif slice_type == 'LSTMY':
-        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]+ CELL_SIZE-1]
+            present_idx = next_idx
 
-    else:
-        print('ERROR: slice type error\n')
 
-    return slice_data
+        #30일 부터 마지막 날까지 데이터
+        if month_idx == LAST_MONTH:
+            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288 - 13
+        else:
+            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288
+        for  cross_idx in range(WEEK_NUM):
+            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx)]
+        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
+
+        present_idx = next_idx
+
+    return zip(np.array(train_idx), np.array(test_idx))
+
+
+
 
 #train과 test에서 얻은 결과를 file로 만든다.
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
 def output_data(train_result, test_result, file_name, cr_idx):
     #train output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    if not (os.path.isdir(RESULT_DIR)):
+        os.makedirs(os.path.join(RESULT_DIR))
+
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -345,7 +369,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):

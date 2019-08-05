@@ -10,14 +10,23 @@ Model/save/
 
 1DConvLSTM_Model/tensorboard/
 1DConvLSTM_Model/save/
+1DConvLSTM_Model/Result/
 2DConvLSTM1_Model/tensorboard/
 2DConvLSTM1_Model/save/
+2DConvLSTM1_Model/Result/
 2DConvLSTM1MSE_Model/tensorboard/
 2DConvLSTM1MSE_Model/save/
+2DConvLSTM1MSE_Model/Result/
 2DConvLSTM256_Model/tensorboard/
 2DConvLSTM256_Model/save/
+2DConvLSTM256_Model/Result/
 2DConvLSTM12MSE_Model/tensorboard/
 2DConvLSTM12MSE_Model/save/
+2DConvLSTM12MSE_Model/Result/
+Week_Data_Model/tensorboard/
+Week_Data_Model/save/
+Week_Data_Model/Reslt/
 
 GAN_Model/tensorboard/
 GAN_Model/save/
+GAN_Model/Result/
