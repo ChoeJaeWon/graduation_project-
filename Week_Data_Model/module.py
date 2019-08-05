@@ -36,6 +36,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
 import csv
+import os
 
 np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
 tf.set_random_seed(777) #tf.random의 seed 설정
@@ -48,6 +49,8 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
+RESULT_DIR = './Result/' #result 경로
+
 
 #FLAG
 RESTORE_FLAG = False #weight 불러오기 여부 [default False]
@@ -62,7 +65,7 @@ WEEK_NUM = 4
 
 
 #variable
-TRAIN_NUM = 1500 #traing 회수 [default 1000]
+TRAIN_NUM = 10 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -377,12 +380,16 @@ def Week_CrossValidation():
 
 
 
-
 #train과 test에서 얻은 결과를 file로 만든다.
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
 def output_data(train_result, test_result, file_name, cr_idx):
+
+    # train output
+    if not (os.path.isdir(RESULT_DIR)):
+        os.makedirs(os.path.join(RESULT_DIR))
+
     #train output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -391,7 +398,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):
