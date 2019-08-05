@@ -101,8 +101,8 @@ _, C_data, E_data,Y_data= input_data(0b011)
 
 
 cr_idx = 0
-kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
+    print(len(train_idx))
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []

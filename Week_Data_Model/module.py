@@ -352,7 +352,7 @@ def Week_CrossValidation():
         else:
             next_idx = present_idx + ONE_DAY
         for cross_idx in range(WEEK_NUM):
-            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-CELL_SIZE)]
         present_idx = next_idx
 
 
@@ -361,9 +361,9 @@ def Week_CrossValidation():
             next_idx = present_idx + ONE_WEEK
             for cross_idx in range(WEEK_NUM):
                 if cross_idx == week_idx:
-                    test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+                    test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-CELL_SIZE)]
                 else:
-                    train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+                    train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-CELL_SIZE)]
             present_idx = next_idx
 
 
