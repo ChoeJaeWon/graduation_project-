@@ -54,3 +54,4 @@
 1. naming rule of boolean variable. REUSE -> isReuse 
 2. adv 파일들 discriminator loss와 generator loss 독립적으로 학습
 3. dropout 지금까지 계산이 안되고 있었고, 현재 연구가 잘 진행 중이므로 일단 보류. 
+4. adv_fc의 성능이 잘나와 인풋 데이터를 하나하나 뜯어봤는데 이상 없음.
