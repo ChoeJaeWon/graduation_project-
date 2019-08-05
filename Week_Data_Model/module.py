@@ -369,7 +369,7 @@ def Week_CrossValidation():
 
         #30일 부터 마지막 날까지 데이터
         if month_idx == LAST_MONTH:
-            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288 - 13
+            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288 - 25
         else:
             next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288
         for  cross_idx in range(WEEK_NUM):
