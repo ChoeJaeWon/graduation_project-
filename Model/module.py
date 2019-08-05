@@ -52,6 +52,15 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 #FLAG
 RESTORE_FLAG = False #weight 불러오기 여부 [default False]
 
+#Fix value(Week Cross Validation)
+DAY = [-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+FIRST_MONTH = 7
+LAST_MONTH = 10
+ONE_DAY = 288
+ONE_WEEK = ONE_DAY * 7
+WEEK_NUM = 4
+
+
 #variable
 TRAIN_NUM = 1500 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
@@ -327,6 +336,55 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size):
 
     return slice_data
 
+
+def Week_CrossValidation():
+    present_idx = 0
+    train_idx = [[], [], [], []]
+    test_idx = [[], [], [], []]
+
+    for month_idx in range(FIRST_MONTH, LAST_MONTH+1):
+        #1일 부터 2일 전까지 데이터
+        if month_idx == FIRST_MONTH:
+            next_idx = present_idx + ONE_DAY-11
+        else:
+            next_idx = present_idx + ONE_DAY
+        for cross_idx in range(WEEK_NUM):
+            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+
+        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
+
+        present_idx = next_idx
+
+
+        #4주차 고려
+        for week_idx in range(WEEK_NUM):
+            next_idx = present_idx + ONE_WEEK
+            for cross_idx in range(WEEK_NUM):
+                if cross_idx == week_idx:
+                    test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+                else:
+                    train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
+            print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
+
+            present_idx = next_idx
+
+
+        #30일 부터 마지막 날까지 데이터
+        if month_idx == LAST_MONTH:
+            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288 - 13
+        else:
+            next_idx = present_idx + (DAY[month_idx] - (WEEK_NUM * 7) - 1) * 288
+        for  cross_idx in range(WEEK_NUM):
+            train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx)]
+        print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
+
+        present_idx = next_idx
+
+    return zip(np.array(train_idx), np.array(test_idx))
+
+
+
+
 #train과 test에서 얻은 결과를 file로 만든다.
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
 def output_data(train_result, test_result, file_name, cr_idx):
@@ -347,5 +405,3 @@ def output_data(train_result, test_result, file_name, cr_idx):
         output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
 
     outputfile.close()
-
-
