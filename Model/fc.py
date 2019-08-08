@@ -74,6 +74,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
         S_test = batch_slice(S_data, test_idx, ba_idx, 'FC', 1)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'FC', 1)
         Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
+        print(S_test)
 
         cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
         mae += cost_MAE_val
@@ -99,9 +100,7 @@ S_data, _, E_data, Y_data  = input_data(0b101) #speed, exogenous 사용
 
 
 cr_idx = 0
-
-kf = KFold(n_splits=CROSS_NUM, shuffle=True)
-for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []

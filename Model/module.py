@@ -36,6 +36,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
 import csv
+import os
 
 np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
 tf.set_random_seed(777) #tf.random의 seed 설정
@@ -361,9 +362,11 @@ def Week_CrossValidation():
         for week_idx in range(WEEK_NUM):
             next_idx = present_idx + ONE_WEEK
             for cross_idx in range(WEEK_NUM):
-                if cross_idx == week_idx:
+                if cross_idx == (month_idx-FIRST_MONTH+week_idx)%4:
+                    print('test%d: %d' % (week_idx, cross_idx))
                     test_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
                 else:
+                    print('train%d: %d' % (week_idx, cross_idx))
                     train_idx[cross_idx]+=[idx for idx in range(present_idx, next_idx-TIME_STAMP)]
             print('%d: [%d, %d)' % (month_idx, present_idx, next_idx))
 
