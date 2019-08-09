@@ -26,7 +26,7 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
 
     D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
     with tf.control_dependencies(D_update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[vars_D, discriminator_weights])
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*5).minimize(loss_D, var_list=[vars_D, discriminator_weights])
 
     G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
     with tf.control_dependencies(G_update_ops):
@@ -107,7 +107,7 @@ S_data, _,  E_data, Y_data= input_data(0b101)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
-for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
+for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
