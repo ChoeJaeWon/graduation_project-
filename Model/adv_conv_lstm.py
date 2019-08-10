@@ -33,11 +33,11 @@ def model(S,C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
 
     D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
     with tf.control_dependencies(D_update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*5).minimize(loss_D, var_list=[vars_D, discriminator_weights])
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*1).minimize(loss_D, var_list=[vars_D, discriminator_weights])
 
     G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_conv') +tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_lstm')
     with tf.control_dependencies(G_update_ops):
-        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[vars_G, conv_weights, convfc_weights, lstm_weights, lstm_biases])
+        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*1).minimize(loss_G, var_list=[vars_G, conv_weights, convfc_weights, lstm_weights, lstm_biases])
 
     return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
