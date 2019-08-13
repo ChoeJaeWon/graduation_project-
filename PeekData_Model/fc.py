@@ -99,7 +99,7 @@ S_data, _, E_data, Y_data  = input_data(0b101) #speed, exogenous 사용
 
 
 cr_idx = 0
-for train_idx, test_idx in Week_CrossValidation():
+for train_idx, test_idx in Peek_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []

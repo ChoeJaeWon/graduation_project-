@@ -97,7 +97,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 _, C_data, E_data, Y_data = input_data(0b011)
 
 cr_idx = 0
-for train_idx, test_idx in Week_CrossValidation():
+for train_idx, test_idx in Peek_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
