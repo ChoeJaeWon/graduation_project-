@@ -37,7 +37,9 @@ import numpy as np
 from sklearn.model_selection import KFold
 import csv
 import os
+import random
 
+random.seed(777)
 np.random.seed(777) #KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
 tf.set_random_seed(777) #tf.random의 seed 설정
 
@@ -114,6 +116,12 @@ DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 DISCRIMINATOR_ALPHA = 0.01 #MSE 앞에 붙는 람다 term
+
+#Hyper Parameter(PEEK_DATA)
+TEST_CASE_NUM = 20
+TEST_RATIO = 10
+TIME_INTERVAL = 24
+DATA_SIZE = 35400-TIME_STAMP
 
 fc_weights = [] #fc weight들의 크기는 layer의 길이에 따라 결정된다.
 discriminator_weights = []
@@ -386,6 +394,29 @@ def Week_CrossValidation():
 
     return zip(np.array(train_idx), np.array(test_idx))
 
+#interval 만큼의 간격으로 data를 뽑는다
+#그후 이를 토대로 test와 train을 격리데이터로 뽑아준다.
+def Peek_Data():
+    train_idx = [[] for _ in range(TEST_CASE_NUM)]
+    test_idx = [[] for _ in range(TEST_CASE_NUM)]
+
+    for idx in range(TEST_CASE_NUM):
+        total_list = [i for i in range(int(DATA_SIZE/TIME_INTERVAL))]
+        test_idx[idx] += random.sample(total_list, int(DATA_SIZE/TIME_INTERVAL/TEST_RATIO))
+        train_list = list(set(total_list)-set(test_idx[idx]))
+
+        start_idx = 0
+        prev_idx = -1
+        for present_idx in range(len(train_list)):
+            if prev_idx != (train_list[present_idx]-1) and present_idx != 0:
+                train_idx[idx]+= [i for i in range(start_idx * TIME_INTERVAL, prev_idx * TIME_INTERVAL +1)]
+                start_idx = train_list[present_idx]
+            prev_idx = train_list[present_idx]
+
+    return zip(np.array(train_idx), np.array(test_idx)*TIME_INTERVAL)
+
+
+
 
 
 
@@ -412,3 +443,8 @@ def output_data(train_result, test_result, file_name, cr_idx):
         output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
 
     outputfile.close()
+
+
+for tr, te in Peek_Data():
+    print(len(tr))
+    print(len(te))
