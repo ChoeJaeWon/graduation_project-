@@ -20,27 +20,36 @@ GAN_Model/__pycache__/
 
 
 #Model tensorboard, save ignore
+
 Model/tensorboard/
 Model/save/
+Model/Result/
 
 1DConvLSTM_Model/tensorboard/
 1DConvLSTM_Model/save/
 1DConvLSTM_Model/Result/
+
 2DConvLSTM1_Model/tensorboard/
 2DConvLSTM1_Model/save/
 2DConvLSTM1_Model/Result/
+
 2DConvLSTM1MSE_Model/tensorboard/
 2DConvLSTM1MSE_Model/save/
 2DConvLSTM1MSE_Model/Result/
+
 2DConvLSTM256_Model/tensorboard/
 2DConvLSTM256_Model/save/
 2DConvLSTM256_Model/Result/
+
 2DConvLSTM12MSE_Model/tensorboard/
 2DConvLSTM12MSE_Model/save/
 2DConvLSTM12MSE_Model/Result/
-Week_Data_Model/tensorboard/
-Week_Data_Model/save/
-Week_Data_Model/Result/
+
+PeekData_Model/tensorboard/
+PeekData_Model/save/
+PeekData_Model/Result/
+
+
 
 GAN_Model/tensorboard/
 GAN_Model/save/

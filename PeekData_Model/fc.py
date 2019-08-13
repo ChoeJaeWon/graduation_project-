@@ -65,15 +65,15 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
 #testing 해준다.
 def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
-    BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
+    BATCH_NUM = 1
     mae = 0.0
     mse = 0.0
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         # Batch Slice
-        S_test = batch_slice(S_data, test_idx, ba_idx, 'FC', 1)
-        E_test = batch_slice(E_data, test_idx, ba_idx, 'FC', 1)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1)
+        S_test = batch_slice(S_data, test_idx, ba_idx, 'FC', 1, len(test_idx))
+        E_test = batch_slice(E_data, test_idx, ba_idx, 'FC', 1, len(test_idx))
+        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'FC', 1, len(test_idx))
 
         cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
         mae += cost_MAE_val
