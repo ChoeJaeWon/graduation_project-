@@ -43,11 +43,15 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 #Setting
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/ExogenousTime/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
+OPTIMIZED_EPOCH_FC = 55
+OPTIMIZED_EPOCH_CONV = 55
+OPTIMIZED_EPOCH_LSTM = 55
+OPTIMIZED_EPOCH_CONV_LSTM = 55
 
 #FLAG
 RESTORE_FLAG = True #weight 불러오기 여부 [default False]
@@ -63,7 +67,7 @@ ONE_WEEK = ONE_DAY * 7
 WEEK_NUM = 4
 
 #variable
-TRAIN_NUM = 1500 #traing 회수 [default 1000]
+TRAIN_NUM = 1000 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -304,9 +308,7 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False
             if DISCRIMINATOR_BATCH_NORM == True:
                 layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
             # 마지막 레이어는 Sigmoid logistic regression, 마지막 출력이 1이라는 가정 하에 작성합니다
-            if layer_idx == DISCRIMINATOR_LAYER_NUM - 1:
-                layer = tf.nn.sigmoid(layer)
-            else:
+            if layer_idx != DISCRIMINATOR_LAYER_NUM - 1:
                 layer = tf.nn.relu(layer)
 
             #if DISCRIMINATOR_DROPOUT == True:

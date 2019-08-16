@@ -17,7 +17,7 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     adv_y = tf.concat([S, Y], axis=1)
     adv_g = tf.concat([S, layer], axis=1)
     loss_D = tf.reduce_mean(Discriminator_model(adv_y, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
-    loss_G = -tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
+    loss_G = -tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)) + DISCRIMINATOR_ALPHA*cost_MSE
 
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='discriminator_fc')
@@ -108,7 +108,6 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 S_data, _,  E_data, Y_data= input_data(0b101)
 
 cr_idx = 0
-kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
 

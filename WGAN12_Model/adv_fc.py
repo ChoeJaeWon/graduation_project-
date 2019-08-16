@@ -132,11 +132,11 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                 Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC')
             #여기도 조건문있어야 하는데 일단은 [TIMESTAMP] 번째 것으로 계산 하자. 원래는 train mse를 뽑는 것이 좋을 것 같음
 
-            if tr_idx > 27:
+            if tr_idx > OPTIMIZED_EPOCH_FC + 5:
                 _= sess.run([train_D, clip_D], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             #print(sess.run(vars_G[2]))
             #print(sess.run(variables1[0]))
-            if (tr_idx <= 27) | (tr_idx > 77):
+            if (tr_idx <= OPTIMIZED_EPOCH_FC + 5) | (tr_idx > OPTIMIZED_EPOCH_FC + 105):
                 cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, train_G], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             #print(sess.run(vars_G[2]))
             #print(sess.run(variables1[0]))
@@ -215,7 +215,7 @@ if LATENT_VECTOR_FLAG:
         DR = tf.placeholder(tf.float32)
         DISCRIMINATOR_BA = tf.placeholder(tf.bool)
         DISCRIMINATOR_DR = tf.placeholder(tf.float32)
-        last_epoch = tf.Variable(18, name=LAST_EPOCH_NAME) #받아올 방법이 없네..
+        last_epoch = tf.Variable(OPTIMIZED_EPOCH_FC+1, name=LAST_EPOCH_NAME) #받아올 방법이 없네..
 
         init()
         sess = tf.Session()

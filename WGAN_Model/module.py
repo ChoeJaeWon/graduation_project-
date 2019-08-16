@@ -25,7 +25,7 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 #Setting
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/Exogenous/x_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
@@ -45,7 +45,7 @@ WEEK_NUM = 4
 
 
 #variable
-TRAIN_NUM = 300 #traing 회수 [default 1000]
+TRAIN_NUM = 1000 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -58,7 +58,7 @@ TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
-VECTOR_SIZE = 83 #fc와 lstm에 들어가는 vector의 크기 [default 83]
+VECTOR_SIZE = 95 #fc와 lstm에 들어가는 vector의 크기 [default 83]
 TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
 EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
 LAYER_UNIT_NUM = [VECTOR_SIZE, 256, 128, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
@@ -87,7 +87,7 @@ FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 
 #Hyper Parameter(Discriminator)
-DISCRIMINATOR_INPUT_NUM = 84
+DISCRIMINATOR_INPUT_NUM = 96
 DISCRIMINATOR_LAYER_NUM = 5
 DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 128,256, 128, 64,1]
 DISCRIMINATOR_BATCH_NORM = True
