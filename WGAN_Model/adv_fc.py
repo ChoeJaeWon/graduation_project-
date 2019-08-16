@@ -16,28 +16,18 @@ def model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     cost_MAPE = MAPE(Y, layer)
     adv_y = tf.concat([S, Y], axis=1)
     adv_g = tf.concat([S, layer], axis=1)
-    loss_D = tf.reduce_mean(Discriminator_model(adv_y, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
-    loss_G = -tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
+    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
 
-    vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='discriminator_fc')
-    vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='generator_fc')
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D)
+        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G)
 
-    clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in vars_D]
-
-    D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
-    with tf.control_dependencies(D_update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*5).minimize(loss_D, var_list=[vars_D])
-
-    G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
-    with tf.control_dependencies(G_update_ops):
-        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[vars_G, fc_weights])
-
-    return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, clip_D
+    return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, clip_D, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
     for _ in range(start_from):
@@ -51,7 +41,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             S_train = batch_slice(S_data, train_idx, ba_idx, 'FC', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'FC', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
-            _= sess.run([train_D, clip_D], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+            _= sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, train_G], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
@@ -109,7 +99,7 @@ S_data, _,  E_data, Y_data= input_data(0b101)
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
-for train_idx, test_idx in Week_CrossValidation():
+for train_idx, test_idx in kf.split(Y_data[:-CELL_SIZE]):
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
@@ -126,7 +116,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     init()
     sess = tf.Session()
-    cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, clip_D = model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
+    cost_MAE, cost_MSE, cost_MAPE, train_D, train_G = model(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
     writer_train = tf.summary.FileWriter("./tensorboard/adv_fc/train%d" % cr_idx, sess.graph)
     writer_test = tf.summary.FileWriter("./tensorboard/adv_fc/test%d" % cr_idx, sess.graph)
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
@@ -153,7 +143,7 @@ for train_idx, test_idx in Week_CrossValidation():
     # train my model
     print('Start learning from:', start_from)
 
-    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, clip_D, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result,CURRENT_POINT_DIR, start_from)
+    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result,CURRENT_POINT_DIR, start_from)
 
     tf.reset_default_graph()
 
