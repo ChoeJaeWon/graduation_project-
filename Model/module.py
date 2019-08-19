@@ -162,7 +162,7 @@ def init():
 
 #shper를 input으로 받아 weight를 initailization 해줌
 def init_weights(input_shape):
-    return tf.Variable(tf.random_normal(input_shape, stddev=0.01)) #name은 임의로 정했음
+    return tf.Variable(tf.random_normal(input_shape, stddev=0.01, seed=777)) #name은 임의로 정했음
 
 
 #file을 numpy array 데이터로 받아옴
