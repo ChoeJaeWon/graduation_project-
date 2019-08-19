@@ -67,8 +67,8 @@ WEEK_NUM = 4
 
 #variable
 TRAIN_NUM = 56 #traing 회수 [default 1000]
-SPEED_MAX = 98 #data내의 최고 속도 [default 100]
-SPEED_MIN = 3 #data내의 최저 속도 [default 0]
+SPEED_MAX = 98.0 #data내의 최고 속도 [default 100]
+SPEED_MIN = 3.0 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 1 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
@@ -203,8 +203,8 @@ def MAE(y_test, y_pred):
     y_pred_orig = y_pred * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
     return tf.reduce_mean(tf.abs(y_test_orig - y_pred_orig))
 def MSE(y_test, y_pred):
-    y_test_orig = tf.math.add(tf.math.multiply(y_test, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
-    y_pred_orig = tf.math.add(tf.math.multiply(y_pred, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
+    y_test_orig = tf.math.add(tf.math.multiply(y_test, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)), SPEED_MIN)
+    y_pred_orig = tf.math.add(tf.math.multiply(y_pred, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)), SPEED_MIN)
     return tf.reduce_mean(tf.square(tf.math.subtract(y_test_orig, y_pred_orig)))
 def MAPE(y_test, y_pred):
     y_test_orig = y_test * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
