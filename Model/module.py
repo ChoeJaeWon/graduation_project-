@@ -203,8 +203,8 @@ def MAE(y_test, y_pred):
     y_pred_orig = y_pred * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
     return tf.reduce_mean(tf.abs(y_test_orig - y_pred_orig))
 def MSE(y_test, y_pred):
-    y_test_orig = tf.math.add(tf.math.mul(y_test, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
-    y_pred_orig = tf.math.add(tf.math.mul(y_pred, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
+    y_test_orig = tf.math.add(tf.math.multiply(y_test, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
+    y_pred_orig = tf.math.add(tf.math.multiply(y_pred, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
     return tf.reduce_mean(tf.square(tf.math.subtract(y_test_orig, y_pred_orig)))
 def MAPE(y_test, y_pred):
     y_test_orig = y_test * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
