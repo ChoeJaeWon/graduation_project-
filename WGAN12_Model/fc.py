@@ -100,6 +100,9 @@ S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
+    np.random.seed(777)  # KFold 의 shuffle과 batch shuffle의 seed를 설정 해준다
+    tf.set_random_seed(777)  # tf.random의 seed 설정
+
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
@@ -113,6 +116,7 @@ for train_idx, test_idx in Week_CrossValidation():
     last_epoch = tf.Variable(0, name=LAST_EPOCH_NAME)
 
     sess = tf.Session()
+
 
     init()
     cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y, BA, DR)
@@ -142,6 +146,7 @@ for train_idx, test_idx in Week_CrossValidation():
     start_from = sess.run(last_epoch)
     # train my model
     print('Start learning from:', start_from)
+    print(sess.run(fc_weights[0]))
 
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
 

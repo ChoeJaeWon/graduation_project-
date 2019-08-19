@@ -19,7 +19,9 @@ def model(S, E, Y, BA, DR):
     cost_MAPE = MAPE(Y, layer)
 
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
     with tf.control_dependencies(update_ops):
+        tf.set_random_seed(777)
         optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
 
     return cost_MAE, cost_MSE, cost_MAPE, optimal
@@ -32,8 +34,10 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         np.random.shuffle(train_idx)
     global_step_tr = 0
     global_step_te = 0
+
     for tr_idx in range(start_from, TRAIN_NUM):
         epoch_cost = 0.0
+
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             S_train = batch_slice(S_data, train_idx, ba_idx, 'FC', 1)
@@ -41,6 +45,8 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
             cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
+            a = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="generator_fc/batch_normalization_3/beta/Adam:0")
+            print(sess.run([a]))
             epoch_cost += cost_MSE_val
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
@@ -97,7 +103,6 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data  = input_data(0b101) #speed, exogenous 사용
 
-
 cr_idx = 0
 for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
@@ -141,6 +146,7 @@ for train_idx, test_idx in Week_CrossValidation():
     start_from = sess.run(last_epoch)
     # train my model
     print('Start learning from:', start_from)
+
 
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
 

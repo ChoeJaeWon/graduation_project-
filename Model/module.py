@@ -103,7 +103,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
-HIDDEN_NUM = 96 #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 
@@ -162,7 +162,7 @@ def init():
 
 #shper를 input으로 받아 weight를 initailization 해줌
 def init_weights(input_shape):
-    return tf.Variable(tf.random_normal(input_shape, stddev=0.01, seed=777)) #name은 임의로 정했음
+    return tf.Variable(tf.random_normal(input_shape, stddev=0.01)) #name은 임의로 정했음
 
 
 #file을 numpy array 데이터로 받아옴
@@ -283,7 +283,7 @@ def LSTM_model(S, E, isReuse = False):
 def multi_LSTM_model(S, E, isReuse = False):
     with tf.variable_scope('generator_lstm', reuse=isReuse):
         x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
-        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=96, forget_bias=FORGET_BIAS)
         lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
         multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])

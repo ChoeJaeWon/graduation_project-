@@ -54,8 +54,8 @@ OPTIMIZED_EPOCH_LSTM = 55
 OPTIMIZED_EPOCH_CONV_LSTM = 55
 
 #FLAG
-RESTORE_FLAG = True #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [default False]
+RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [default False]
 LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 
 #Fix value(Week Cross Validation)
