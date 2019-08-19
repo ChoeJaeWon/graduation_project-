@@ -203,14 +203,13 @@ def MAE(y_test, y_pred):
     y_pred_orig = y_pred * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
     return tf.reduce_mean(tf.abs(y_test_orig - y_pred_orig))
 def MSE(y_test, y_pred):
-    y_test_orig = y_test * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
-    y_pred_orig = y_pred * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
-    return tf.reduce_mean(tf.square((y_test_orig - y_pred_orig)))
+    y_test_orig = tf.math.add(tf.math.mul(y_test, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
+    y_pred_orig = tf.math.add(tf.math.mul(y_pred, tf.math.add(tf.math.subtract(SPEED_MAX, SPEED_MIN), 1e-7)))
+    return tf.reduce_mean(tf.square(tf.math.subtract(y_test_orig, y_pred_orig)))
 def MAPE(y_test, y_pred):
     y_test_orig = y_test * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
     y_pred_orig = y_pred * (SPEED_MAX - SPEED_MIN + 1e-7) + SPEED_MIN
     return tf.reduce_mean(tf.abs((y_test_orig - y_pred_orig) / y_test_orig)) * 100
-
 
 #FC_model로 input으로 CNN output이 output으로 예측 속도값이 나온다.
 def FC_model(S, E, BA, DR, isReuse =False):
