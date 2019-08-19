@@ -14,7 +14,7 @@ from module import *
 import os
 #LSTM을 구현
 def model(S, E, Y):
-    layer = LSTM_model(S, E)
+    layer = multi_LSTM_model(S, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)

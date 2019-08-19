@@ -103,7 +103,7 @@ LAST_LAYER_SIZE = 8
 
 
 #Hyper Parameter(LSTM)
-HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = 96 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 
@@ -279,6 +279,22 @@ def LSTM_model(S, E, isReuse = False):
 
         # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
+
+def multi_LSTM_model(S, E, isReuse = False):
+    with tf.variable_scope('generator_lstm', reuse=isReuse):
+        x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
+        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+
+        multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
+
+        outputs, _ = tf.nn.static_rnn(cell=multi_cell, inputs=x, dtype=tf.float32)
+        # outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+
+        # Linear activation, using rnn inner loop last output
+    return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
+
+
 
 #discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 S랑 다름 -> 매우 중요
 def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, isReuse = False):
