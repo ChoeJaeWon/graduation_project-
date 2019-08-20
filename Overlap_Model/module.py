@@ -66,11 +66,11 @@ WEEK_NUM = 4
 
 
 #variable
-TRAIN_NUM = 300 #traing 회수 [default 1000]
+TRAIN_NUM = 0 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 1 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_ITERATION_NUM = 20 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
@@ -118,9 +118,9 @@ DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
 DISCRIMINATOR_ALPHA = 0.01 #MSE 앞에 붙는 람다 term
 
 #Hyper Parameter(PEEK_DATA)
-TEST_CASE_NUM = 10
+TEST_CASE_NUM = 20
 TEST_RATIO = 10
-TIME_INTERVAL = 12
+TIME_INTERVAL = 24
 DATA_SIZE = 35400-TIME_STAMP
 OVERLAP = 0
 
@@ -410,7 +410,7 @@ def Peek_Data():
         prev_idx = -1
         for present_idx in range(len(train_list)):
             if prev_idx != (train_list[present_idx]-1) and present_idx != 0:
-                train_idx[idx]+= [i for i in range(start_idx * TIME_INTERVAL, prev_idx * TIME_INTERVAL +1 + OVERLAP)]
+                train_idx[idx]+= [i for i in range(start_idx * TIME_INTERVAL, prev_idx * TIME_INTERVAL +1)]
                 start_idx = train_list[present_idx]
             prev_idx = train_list[present_idx]
 

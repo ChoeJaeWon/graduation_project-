@@ -45,8 +45,6 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
             cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
-            a = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope="generator_fc/batch_normalization_3/beta/Adam:0")
-            print(sess.run([a]))
             epoch_cost += cost_MSE_val
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
