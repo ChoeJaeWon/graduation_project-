@@ -309,9 +309,7 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False
             if DISCRIMINATOR_BATCH_NORM == True:
                 layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
             # 마지막 레이어는 Sigmoid logistic regression, 마지막 출력이 1이라는 가정 하에 작성합니다
-            if layer_idx == DISCRIMINATOR_LAYER_NUM - 1:
-                layer = tf.nn.sigmoid(layer)
-            else:
+            if layer_idx != DISCRIMINATOR_LAYER_NUM - 1:
                 layer = tf.nn.relu(layer)
 
             #if DISCRIMINATOR_DROPOUT == True:
