@@ -6,3 +6,5 @@
 **/tensorboard/
 **/save/
 **/Result/
+
+!WGAN_Model_base/save/

@@ -28,8 +28,12 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
     Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
-    loss_D = tf.reduce_mean(Discriminator_model(Y, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
-    loss_G = -tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)) + DISCRIMINATOR_ALPHA*cost_MSE
+    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(Y, E[TIME_STAMP - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))) + DISCRIMINATOR_ALPHA * train_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
+
+    #WGAN
+    #loss_D = tf.reduce_mean(Discriminator_model(Y, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
+    #loss_G = -tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)) + DISCRIMINATOR_ALPHA*cost_MSE
 
 
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
@@ -37,7 +41,9 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='generator_fc') #다양해지면 여기가 모델마다 바뀜
 
-    clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in vars_D]
+    #WGAN
+    #clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in vars_D]
+    clip_D = 0
 
     D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
     with tf.control_dependencies(D_update_ops):
@@ -73,7 +79,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
 
             if tr_idx > OPTIMIZED_EPOCH_FC + 10: # generator 먼저 선학습 후 discriminator 단독 학습
-                _= sess.run([train_D, clip_D], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+                _= sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
             if (tr_idx <= OPTIMIZED_EPOCH_FC + 10) | (tr_idx > OPTIMIZED_EPOCH_FC + 30):
                 cost_MSE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
 
@@ -88,13 +94,6 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
             print("Train loss %d: %lf" % (tr_idx, epoch_loss / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-
-            print("Saving network...")
-            sess.run(last_epoch.assign(tr_idx + 1))
-            if not os.path.exists(CURRENT_POINT_DIR):
-                os.makedirs(CURRENT_POINT_DIR)
-            saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-
             global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
         #cross validation의 train_idx를 shuffle해준다.
