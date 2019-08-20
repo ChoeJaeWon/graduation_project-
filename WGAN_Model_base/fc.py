@@ -13,13 +13,11 @@ import os
 #FC를 구현
 def model(S, E, Y, BA, DR):
     layer = FC_model(S, E, BA, DR)
-
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
     cost_MAPE = MAPE(Y, layer)
 
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-
     with tf.control_dependencies(update_ops):
         optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
 
@@ -33,17 +31,13 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         np.random.shuffle(train_idx)
     global_step_tr = 0
     global_step_te = 0
-
     for tr_idx in range(start_from, TRAIN_NUM):
         epoch_cost = 0.0
-
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             S_train = batch_slice(S_data, train_idx, ba_idx, 'FC', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'FC', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
-
-            print(sess.run([fc_weights[0][0][0]]))
 
             cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
@@ -100,9 +94,11 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 
 ###################################################-MAIN-###################################################
-S_data, _, E_data, Y_data  = input_data(0b101) #speed, exogenous 사용
+S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
+
 
 cr_idx = 0
+kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
 
@@ -129,23 +125,23 @@ for train_idx, test_idx in Week_CrossValidation():
 
     # Saver and Restore
     saver = tf.train.Saver()
+
     CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_" + str(cr_idx) + "/"
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
     if RESTORE_FLAG:
         if checkpoint and checkpoint.model_checkpoint_path:
-            try:
+            #try:
                 saver.restore(sess, checkpoint.model_checkpoint_path)
                 print("Successfully loaded:", checkpoint.model_checkpoint_path)
-            except:
-                print("Error on loading old network weights")
+            #except:
+            #    print("Error on loading old network weights")
         else:
             print("Could not find old network weights")
 
     start_from = sess.run(last_epoch)
     # train my model
     print('Start learning from:', start_from)
-
 
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
 
