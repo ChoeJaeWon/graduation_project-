@@ -43,8 +43,6 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             E_train = batch_slice(E_data, train_idx, ba_idx, 'FC', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
-            print(sess.run([fc_weights[0][0][0]]))
-
             cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
             epoch_cost += cost_MSE_val
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)

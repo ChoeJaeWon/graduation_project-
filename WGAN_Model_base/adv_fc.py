@@ -28,7 +28,7 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
     Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
-    loss_D = tf.reduce_mean(Discriminator_model(Y, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(adv_g, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
+    loss_D = tf.reduce_mean(Discriminator_model(Y, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
     loss_G = -tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)) + DISCRIMINATOR_ALPHA*cost_MSE
 
 
