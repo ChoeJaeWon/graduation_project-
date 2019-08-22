@@ -14,8 +14,8 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
         else:
             layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
     layer = LSTM_model_12(layer, E)
-    layer = tf.reshape(layer, [12, BATCH_SIZE])
-    Y = tf.reshape(Y, [12, BATCH_SIZE])
+    layer = tf.reshape(layer, [CELL_SIZE, BATCH_SIZE])
+    Y = tf.reshape(Y, [CELL_SIZE, BATCH_SIZE])
 
     train_MSE = MSE(Y, layer)
     cost_MAE = MAE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
@@ -28,12 +28,19 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     loss_D = tf.reduce_mean(Discriminator_model(Y, E[CELL_SIZE - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) - tf.reduce_mean(Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))
     loss_G = -tf.reduce_mean(Discriminator_model(layer, E[CELL_SIZE - 1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)) + DISCRIMINATOR_ALPHA * cost_MSE
 
+    epsilon = tf.random_uniform(shape=[BATCH_SIZE, CELL_SIZE], minval=0., maxval=1.)
+    Y_hat = Y + epsilon * (layer - Y)
+    D_Y_hat = Discriminator_model(Y_hat, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)
+    grad_D_Y_hat = tf.gradients(D_Y_hat, [Y_hat])[0]
+    slopes = tf.sqrt(tf.reduce_sum(tf.square(grad_D_Y_hat), reduction_indices=[1]))
+    gradient_penalty = tf.reduce_mean((slopes - 1.) ** 2)
+    loss_D = loss_D + 1.0 * gradient_penalty
+
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='discriminator_fc')  # 여기는 하나로 함수 합쳤음
     vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='generator_conv') + tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='generator_lstm')  # 다양해지면 여기가 모델마다 바뀜
-    clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in vars_D]
 
 
     D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
@@ -44,43 +51,11 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     with tf.control_dependencies(G_update_ops):
         train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G, var_list=[vars_G ,lstm_weights, lstm_biases, conv_weights, convfc_weights])
 
-    return train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, clip_D#, train_G_MSE
+    return train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G#, train_G_MSE
 
-
-def model(S,C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
-    for idx in range(CELL_SIZE):
-        if idx == 0:
-            layer = tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])
-        else:
-            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
-    layer = LSTM_model(layer, E)
-
-    cost_MAE = MAE(Y, layer)
-    cost_MSE = MSE(Y, layer)
-    cost_MAPE = MAPE(Y, layer)
-
-    #CELL_SIZE 가 input x라고 가정합니다.
-    adv_y = tf.concat([S[CELL_SIZE-1], Y], axis=1)
-    adv_g = tf.concat([S[CELL_SIZE-1], layer], axis=1)
-    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(adv_y, E[CELL_SIZE-1] , DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(adv_g, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)))
-    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(adv_g, E[CELL_SIZE-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR))) + DISCRIMINATOR_ALPHA * cost_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
-
-    vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='discriminator_fc')  # 여기는 하나로 함수 합쳤음
-    vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='generator_conv') + tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='generator_lstm')  # 다양해지면 여기가 모델마다 바뀜
-
-
-    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    with tf.control_dependencies(update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_D, var_list=[vars_D])
-        train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE*2).minimize(loss_G, var_list=[vars_G])
-
-    return cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G#, train_G_MSE
 
 #training 해준다.
-def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, clip_D, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
     for _ in range(start_from):
@@ -96,15 +71,9 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MA
             C_train = batch_slice(C_data, train_idx, ba_idx, 'CONV', CELL_SIZE)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
-            '''
-            else:
-                S_train = batch_sloce(S_data, train_dix, ba_idx, '
-                C_train = batch_slice(C_data, train_idx, ba_idx, 'CONV', CELL_SIZE)
-                E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
-                Y_train = batch_slice(Y_data, train_idx, ba_idx, 'LSTMY', 1)
-            '''
+
             if tr_idx > OPTIMIZED_EPOCH_CONV_LSTM + 5:
-                _, _ = sess.run([train_D, clip_D], feed_dict={ C:C_train, E:E_train, Y: Y_train, BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
+                _= sess.run([train_D], feed_dict={ C:C_train, E:E_train, Y: Y_train, BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
             if (tr_idx <= OPTIMIZED_EPOCH_CONV_LSTM + 5) | (tr_idx > OPTIMIZED_EPOCH_CONV_LSTM + 25):
                 cost_MSE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G], feed_dict={C:C_train, E:E_train, Y: Y_train,BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
                 epoch_cost += cost_MSE_val
@@ -190,7 +159,7 @@ if LATENT_VECTOR_FLAG:
 
         init()
         sess = tf.Session()
-        train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, clip_D  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
+        train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm/test%d" % cr_idx, sess.graph)
         train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
@@ -226,7 +195,7 @@ if LATENT_VECTOR_FLAG:
         # train my model
         print('Start learning from:', start_from)
 
-        train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G,clip_D, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
+        train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
 
         tf.reset_default_graph()
 
