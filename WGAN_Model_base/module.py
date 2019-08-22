@@ -54,7 +54,7 @@ OPTIMIZED_EPOCH_LSTM = 0
 OPTIMIZED_EPOCH_CONV_LSTM = 0
 
 #FLAG
-RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+RESTORE_FLAG = True #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [default False]
 LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 
@@ -73,7 +73,7 @@ SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 1 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
-LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
+LEARNING_RATE = 0.00.01 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
