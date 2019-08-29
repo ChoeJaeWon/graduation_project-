@@ -96,7 +96,7 @@ FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 
 #Hyper Parameter(Discriminator)
-DISCRIMINATOR_INPUT_NUM = 84
+DISCRIMINATOR_INPUT_NUM = 96
 DISCRIMINATOR_LAYER_NUM = 4
 DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 256, 128, 64, 1]
 DISCRIMINATOR_BATCH_NORM = True
@@ -283,7 +283,6 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
             tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
 
     return layer
-
 
 #type에 따라 다른 batch slice 결과를 내어준다.
 #da_idx는 cross validation해서 나온 idx의 집합
