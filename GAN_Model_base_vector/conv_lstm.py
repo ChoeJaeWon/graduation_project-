@@ -15,7 +15,7 @@ def model(C, E, Y, BA):
             layer = tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])
         else:
             layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
-    layer = multi_LSTM_model(layer, E)
+    layer = LSTM_model(layer, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
@@ -101,6 +101,7 @@ _, C_data, E_data,Y_data= input_data(0b011)
 
 
 cr_idx = 0
+kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
 

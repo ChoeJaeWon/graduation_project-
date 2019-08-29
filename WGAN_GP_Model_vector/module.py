@@ -51,11 +51,11 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 10
 OPTIMIZED_EPOCH_CONV = 30
 OPTIMIZED_EPOCH_LSTM = 10
-OPTIMIZED_EPOCH_CONV_LSTM = 5
+OPTIMIZED_EPOCH_CONV_LSTM = 10
 
 #FLAG
-RESTORE_FLAG = False #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
+RESTORE_FLAG = True #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
 LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
@@ -68,7 +68,7 @@ ONE_WEEK = ONE_DAY * 7
 WEEK_NUM = 4
 
 #variable
-TRAIN_NUM = 200 #traing 회수 [default 1000]
+TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -330,7 +330,7 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False
 
             #if DISCRIMINATOR_DROPOUT == True:
                 #layer = tf.nn.dropout(layer, keep_prob=discriminator_dropout_prob)
-    return layer
+    return tf.nn.sigmoid(layer)
 
 #discriminator model conv 입니다. 여기서 Z는 latent (예측 벡터, 메트릭스)
 def Discriminator_model_Conv(Z, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False):
