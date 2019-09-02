@@ -9,17 +9,14 @@ from module import *
 import os
 #위에있는 것이 12prediction
 
-#discriminator conv
-def model_vector(S, E, Y, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
+def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     for idx in range(TIME_STAMP):
         if idx == 0:
-            layer = tf.reshape(FC_model(S[idx], E[idx], BA, DR), [1, BATCH_SIZE, 1, 1])  # 마지막에 conv 에서는 timestamp
+            layer = tf.reshape(FC_model(S[idx], E[idx], BA, DR), [1, BATCH_SIZE])  # 마지막에 conv 에서는 timestamp
         else:
-            layer = tf.concat([layer, tf.reshape(FC_model(S[idx], E[idx], BA, DR, True), [1, BATCH_SIZE, 1, 1])], axis=0)
+            layer = tf.concat([layer, tf.reshape(FC_model(S[idx], E[idx], BA, DR, True), [1, BATCH_SIZE])], axis=0)
 
-    Y = tf.reshape(Y, [12, BATCH_SIZE, 1, 1])  # 왜 마지막에 1을 붙여줘야 하는가
-    # axis 2 는 생략 (layer, y 둘다 1임)
-
+    Y = tf.reshape(Y, [12, BATCH_SIZE]) #일단 통일시켜놨기 떄문에 어쩔 수 없는 부분
     # 3차원 오차, MAE, MAPE는 Train 에서는 필요 없음
     # cost_MAE = MAE(Y, layer)
     train_MSE = MSE(Y, layer)
@@ -28,32 +25,44 @@ def model_vector(S, E, Y, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     cost_MSE = MSE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
     cost_MAPE = MAPE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
 
-    layer = tf.transpose(layer, perm=[1, 0, 2, 3])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
-    Y = tf.transpose(Y, perm=[1, 0, 2, 3])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
+    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
+    Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
-    #Pix2Pix
-    DE = tf.concat([E[TIME_STAMP-1], S[TIME_STAMP-1]], axis=1)
+    # Pix2Pix
+    DE = tf.concat([E[TIME_STAMP - 1], S[TIME_STAMP - 1]], axis=1)
 
-    loss_D = -tf.reduce_mean(
-        tf.log(Discriminator_model_Conv(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(
-            1 - Discriminator_model_Conv(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
-    loss_G = -tf.reduce_mean(tf.log(Discriminator_model_Conv(layer, DE, DISCRIMINATOR_BA,
-                                                        DISCRIMINATOR_DR, True))) + DISCRIMINATOR_ALPHA * train_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
-
+    loss_D = -tf.reduce_mean(tf.log(Discriminator_model(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))  + DISCRIMINATOR_ALPHA * train_MSE # MSE 는 0~ t까지 있어봤자 같은 값이다.
+    ''''''
+    loss_G_MSE = train_MSE
+    ''''''
+    ''''''
+    loss_G_Gen = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA,DISCRIMINATOR_DR, True)))
+    ''''''
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                               scope='discriminator_conv') #여기는 하나로 함수 합쳤음
+                               scope='discriminator_fc') #여기는 하나로 함수 합쳤음
     vars_G = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='generator_fc') #다양해지면 여기가 모델마다 바뀜
 
-    D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_conv')
+    D_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='discriminator_fc')
     with tf.control_dependencies(D_update_ops):
-        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_D, var_list=[vars_D, discriminator_weights, discriminator_conv_weights, discriminator_convfc_weights]) #이 부분은 모델별로 고정
+        train_D = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_D, var_list=[vars_D, discriminator_weights]) #이 부분은 모델별로 고정
 
     G_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
     with tf.control_dependencies(G_update_ops):
         train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G, var_list=[vars_G ,fc_weights])
+    ''''''
+    G_MSE_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
+    with tf.control_dependencies(G_MSE_update_ops):
+        train_G_MSE = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G_MSE, var_list=[vars_G, fc_weights])
+    ''''''
+    ''''''
+    G_Gen_update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, scope='generator_fc')
+    with tf.control_dependencies(G_Gen_update_ops):
+        train_G_Gen = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G_Gen,var_list=[vars_G, fc_weights])
+    ''''''
+    return train_MSE,cost_MAE, cost_MSE, cost_MAPE, train_D, train_G , loss_G, train_G_MSE, train_G_Gen
 
-    return train_MSE,cost_MAE, cost_MSE, cost_MAPE, train_D, train_G,
 
 
 #training 해준다.

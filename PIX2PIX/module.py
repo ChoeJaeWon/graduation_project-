@@ -57,9 +57,9 @@ PHASE2_EPOCH = 20
 
 
 #FLAG
-RESTORE_FLAG = True #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
-LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
+RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
+LATENT_VECTOR_FLAG = False #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
@@ -476,7 +476,7 @@ def Week_CrossValidation():
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
 def output_data(train_result, test_result, file_name, cr_idx):
     #train output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    outputfile = open('./Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -485,7 +485,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('../Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    outputfile = open('./Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):
