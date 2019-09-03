@@ -76,6 +76,12 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
     for tr_idx in range(start_from, TRAIN_NUM):
         epoch_cost = 0.0
         epoch_loss = 0.0
+        '''
+        global_step_tr, epoch_cost, epoch_loss = train_generator_all(BATCH_NUM,global_step_tr,epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_mse_only(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_g_loss_only(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_discriminator(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        '''
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             #if LATENT_VECTOR_FLAG:
