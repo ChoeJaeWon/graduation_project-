@@ -12,11 +12,11 @@ import os
 def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     for gen_idx in range(GEN_NUM):
         if gen_idx == 0:
-            layer = tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR), [1, BATCH_SIZE])  # 마지막에 conv 에서는 timestamp
+            layer = tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR), [1, -1])  # 마지막에 conv 에서는 timestamp
         else:
-            layer = tf.concat([layer, tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR, True), [1, BATCH_SIZE])], axis=0)
+            layer = tf.concat([layer, tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR, True), [1, -1])], axis=0)
 
-    Y = tf.reshape(Y, [12, BATCH_SIZE]) #일단 통일시켜놨기 떄문에 어쩔 수 없는 부분
+    Y = tf.reshape(Y, [12, -1]) #일단 통일시켜놨기 떄문에 어쩔 수 없는 부분
     # 3차원 오차, MAE, MAPE는 Train 에서는 필요 없음
     # cost_MAE = MAE(Y, layer)
     train_MSE = MSE(Y, layer)
@@ -40,7 +40,7 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
                                                         DISCRIMINATOR_DR, True)))  + DISCRIMINATOR_ALPHA * train_MSE # MSE 는 0~ t까지 있어봤자 같은 값이다.
     loss_G_MSE = train_MSE
 
-    loss_G_Gen = -tf.reduce_mean(tf.log(Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA,
+    loss_G_Gen = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA,
                                                         DISCRIMINATOR_DR, True)))
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='discriminator_fc') #여기는 하나로 함수 합쳤음
@@ -63,11 +63,11 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     with tf.control_dependencies(G_Gen_update_ops):
         train_G_Gen = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G_Gen,var_list=[vars_G, fc_weights])
 
-    return train_MSE,cost_MAE, cost_MSE, cost_MAPE, train_D, train_G , loss_G, train_G_MSE, train_G_Gen
+    return train_MSE,cost_MAE, cost_MSE, cost_MAPE, train_D, train_G , loss_G, train_G_MSE, train_G_Gen, tf.reduce_mean(layer[TIME_STAMP-1])
 
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from, prediction):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
     for _ in range(start_from):
@@ -105,7 +105,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             train_result.append(epoch_cost / BATCH_NUM)
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
             print("Train loss %d: %lf" % (tr_idx, epoch_loss / BATCH_NUM))
-        if tr_idx == TEST_PRINT_INTERVAL == 47:
+        if tr_idx == TRAIN_NUM-1:
             if MASTER_SAVE_FLAG:
                 sess.run(last_epoch.assign(tr_idx + 1))
                 print("Saving network...")
@@ -113,30 +113,29 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                     os.makedirs(CURRENT_POINT_DIR)
                 saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
-            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
+            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result, prediction)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
 
-#testing 해준다.
-def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
+def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result,prediction):
     BATCH_NUM = int(len(test_idx))
     print("test batch number: %d" % BATCH_NUM)
 
     for ba_idx in range(BATCH_NUM):
-        #if LATENT_VECTOR_FLAG:
-        S_test = np.reshape(S_data[ba_idx:ba_idx+12], (12, 1, 12))
-        E_test = np.reshape(E_data[ba_idx:ba_idx+12], (12, 1, 83))
-        Y_test = np.reshape(Y_data[ba_idx:ba_idx+12], (12, 1, 1))
+        # Batch Slice
+        S_test = np.reshape(S_data[ba_idx:ba_idx + 12], (12, 1, 12))
+        E_test = np.reshape(E_data[ba_idx:ba_idx + 12], (12, 1, 83))
+        Y_test = np.reshape(Y_data[ba_idx:ba_idx + 12], (12, 1, 1))
 
-        mae, mse, mape, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
-
-
+        mae, mse, mape, s = sess.run([cost_MAE, cost_MSE, cost_MAPE, prediction], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
 
 
-        global_step_te += 1
-        test_result.append([mae, mse, mape])
+
+        global_step_te+=1
+        test_result.append([mae, mse, mape, s])
+
 
     return global_step_te
 
@@ -176,7 +175,7 @@ for train_idx, test_idx in Week_CrossValidation():
     init()
     sess = tf.Session()
     #여기서는 모델만 외부 플래그, 그냥 train까지 외부 플래그 해도 됨
-    train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, train_G_MSE, train_G_Gen= model_base(S, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
+    train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, train_G_MSE, train_G_Gen, prediction= model_base(S, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     writer_train = tf.summary.FileWriter("./tensorboard/adv_fc/train%d" % cr_idx, sess.graph)
     writer_test = tf.summary.FileWriter("./tensorboard/adv_fc/test%d" % cr_idx, sess.graph)
     train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
@@ -214,7 +213,7 @@ for train_idx, test_idx in Week_CrossValidation():
     #train도 외부에서 FLAG해도됨. 지금은 안에 조건문이 있음
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist,
           train_D, train_G, train_idx, np.array([i for i in range(35350)]), cr_idx, writer_train, writer_test, train_result, test_result,
-          CURRENT_POINT_DIR, start_from)
+          CURRENT_POINT_DIR, start_from, prediction)
 
     tf.reset_default_graph()
 

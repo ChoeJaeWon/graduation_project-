@@ -48,7 +48,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
             train_result.append(epoch_cost/BATCH_NUM)
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
-        if tr_idx == 34:
+        if tr_idx == TRAIN_NUM-1:
 
             print("Saving network...")
             sess.run(last_epoch.assign(tr_idx + 1))

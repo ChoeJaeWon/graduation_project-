@@ -318,6 +318,7 @@ def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False
     with tf.variable_scope('discriminator_fc', reuse=is_reuse):
         discriminator_batch_prob = DISCRIMINATOR_BA
         discriminator_dropout_prob = DISCRIMINATOR_DR
+
         for layer_idx in range(DISCRIMINATOR_LAYER_NUM): #same as FC_LAYER_NUM
             if layer_idx != 0:
                 layer = tf.matmul(layer, discriminator_weights[layer_idx])
