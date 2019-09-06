@@ -51,7 +51,7 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 10
 OPTIMIZED_EPOCH_CONV = 30
 OPTIMIZED_EPOCH_LSTM = 10
-OPTIMIZED_EPOCH_CONV_LSTM = 9
+OPTIMIZED_EPOCH_CONV_LSTM = 10
 
 #FLAG
 RESTORE_FLAG = True #weight 불러오기 여부 [default False]
@@ -112,7 +112,7 @@ CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 GEN_NUM = 12 #generator의 개수
 
 #Hyper Parameter(Discriminator)
-DISCRIMINATOR_INPUT_NUM = 12 #discriminator conv 이면 83 FC 이면 84
+DISCRIMINATOR_INPUT_NUM = 107 #discriminator conv 이면 83 FC 이면 84
 DISCRIMINATOR_LAYER_NUM = 4
 DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 256, 128, 64, 1]
 DISCRIMINATOR_BATCH_NORM = True
@@ -314,7 +314,7 @@ def LSTM_model_12(S, E, is_reuse=False):
     return tf.matmul(outputs, lstm_weights) + lstm_biases
 
 #discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 S랑 다름 -> 매우 중요, 또는 conv일떈 12짜리 예측 벡터
-def Discriminator_model(X, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False):
+def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False):
     with tf.variable_scope('discriminator_fc', reuse=is_reuse):
         discriminator_batch_prob = DISCRIMINATOR_BA
         discriminator_dropout_prob = DISCRIMINATOR_DR
@@ -322,7 +322,7 @@ def Discriminator_model(X, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False):
             if layer_idx != 0:
                 layer = tf.matmul(layer, discriminator_weights[layer_idx])
             else:
-                layer = tf.matmul(X, discriminator_weights[layer_idx])
+                layer = tf.matmul(tf.concat([X, E], axis=1), discriminator_weights[layer_idx])
 
             if DISCRIMINATOR_BATCH_NORM == True:
                 layer = tf.layers.batch_normalization(layer, center=True, scale=True, training=discriminator_batch_prob)
@@ -463,13 +463,11 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size=1):
 
     elif slice_type == 'ADV_LSTMY':
         for gen_idx in range(GEN_NUM):
-            temp_gen = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE] + CELL_SIZE - 1 + gen_idx].reshape(1, BATCH_SIZE, -1)
+            temp_gen = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE] + CELL_SIZE - 1 + gen_idx].reshape(BATCH_SIZE, 1)
             if gen_idx == 0:
                 slice_data = temp_gen
             else:
-                slice_data = np.append(slice_data, temp_gen, axis=0)
-    elif slice_type == 'NONE':
-        slice_data = np.array([])
+                slice_data = np.append(slice_data, temp_gen, axis=1)
 
 
     else:

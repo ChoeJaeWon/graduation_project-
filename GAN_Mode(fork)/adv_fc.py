@@ -30,15 +30,17 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
     #Pix2Pix
+    DE = tf.concat([E[TIME_STAMP - 1], S[TIME_STAMP - 1]], axis=1)
+
 
     loss_D = -tf.reduce_mean(
-        tf.log(Discriminator_model(Y, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(
-            1 - Discriminator_model(layer, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
-    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DISCRIMINATOR_BA,
+        tf.log(Discriminator_model(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(
+            1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA,
                                                         DISCRIMINATOR_DR, True)))  + DISCRIMINATOR_ALPHA * train_MSE # MSE 는 0~ t까지 있어봤자 같은 값이다.
     loss_G_MSE = train_MSE
 
-    loss_G_Gen = -tf.reduce_mean(tf.log(Discriminator_model(layer, DISCRIMINATOR_BA,
+    loss_G_Gen = -tf.reduce_mean(tf.log(Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA,
                                                         DISCRIMINATOR_DR, True)))
     vars_D = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
                                scope='discriminator_fc') #여기는 하나로 함수 합쳤음
@@ -82,13 +84,11 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
-            if tr_idx > OPTIMIZED_EPOCH_FC :  # generator 먼저 선학습 후 discriminator 단독 학습
-                _ = sess.run([train_D],
-                             feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True,
-                                        DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+            if tr_idx > OPTIMIZED_EPOCH_FC + 10:  # generator 먼저 선학습 후 discriminator 단독 학습
+                _ = sess.run([train_D], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
                 # print(sess.run(vars_G[2]))
                 # print(sess.run(variables1[0]))
-            if (tr_idx <= OPTIMIZED_EPOCH_FC) | (tr_idx > OPTIMIZED_EPOCH_FC + 30):
+            if (tr_idx <= OPTIMIZED_EPOCH_FC + 10) | (tr_idx > OPTIMIZED_EPOCH_FC + 30):
                 cost_MSE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G],
                                                                     feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True,
                                                                                DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True,
