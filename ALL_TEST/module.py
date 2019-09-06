@@ -69,7 +69,7 @@ WEEK_NUM = 4
 INTERVAL = 36 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 1 #traing 회수 [default 1000]
+TRAIN_NUM = 35 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
@@ -532,7 +532,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):
-        output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
+        output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2]),str(test_result[te_idx][3])])
 
     outputfile.close()
 

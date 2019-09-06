@@ -21,10 +21,10 @@ def model(S, E, Y, BA, DR):
     with tf.control_dependencies(update_ops):
         optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
 
-    return cost_MAE, cost_MSE, cost_MAPE, optimal
+    return cost_MAE, cost_MSE, cost_MAPE, optimal, tf.reduce_mean(layer)
 
 #training 해준다.
-def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from,prediction):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
     for _ in range(start_from):
@@ -56,14 +56,14 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                 os.makedirs(CURRENT_POINT_DIR)
             saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
-            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
+            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result,prediction)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
 
 #testing 해준다.
-def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
+def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result,prediction):
     BATCH_NUM = int(len(test_idx))
     print("test batch number: %d" % BATCH_NUM)
 
@@ -73,12 +73,12 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
         E_test = np.reshape(E_data[ba_idx], (1,83))
         Y_test = np.reshape(Y_data[ba_idx], (1,1))
 
-        mae, mse, mape, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+        mae, mse, mape, s = sess.run([cost_MAE, cost_MSE, cost_MAPE, prediction], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
 
 
 
         global_step_te+=1
-        test_result.append([mae, mse, mape])
+        test_result.append([mae, mse, mape, s])
 
 
     return global_step_te
@@ -108,7 +108,7 @@ for train_idx, test_idx in Week_CrossValidation():
     sess = tf.Session()
 
     init()
-    cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y, BA, DR)
+    cost_MAE, cost_MSE, cost_MAPE, optimal, prediction = model(S, E, Y, BA, DR)
     writer_train = tf.summary.FileWriter("./tensorboard/fc/train%d" % cr_idx, sess.graph)
     writer_test = tf.summary.FileWriter("./tensorboard/fc/test%d" % cr_idx, sess.graph)
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
@@ -136,7 +136,7 @@ for train_idx, test_idx in Week_CrossValidation():
     # train my model
     print('Start learning from:', start_from)
 
-    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, np.array([i for i in range(35350)]), cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
+    train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, np.array([i for i in range(35350)]), cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from,prediction)
 
     tf.reset_default_graph()
 
