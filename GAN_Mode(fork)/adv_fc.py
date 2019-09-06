@@ -84,11 +84,11 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
-            if tr_idx > OPTIMIZED_EPOCH_FC + 10:  # generator 먼저 선학습 후 discriminator 단독 학습
+            if tr_idx > OPTIMIZED_EPOCH_FC + PHASE1_EPOCH:  # generator 먼저 선학습 후 discriminator 단독 학습
                 _ = sess.run([train_D], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
                 # print(sess.run(vars_G[2]))
                 # print(sess.run(variables1[0]))
-            if (tr_idx <= OPTIMIZED_EPOCH_FC + 10) | (tr_idx > OPTIMIZED_EPOCH_FC + 30):
+            if (tr_idx <= OPTIMIZED_EPOCH_FC + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_FC + PHASE1_EPOCH + PHASE2_EPOCH):
                 cost_MSE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G],
                                                                     feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True,
                                                                                DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True,
@@ -224,7 +224,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_fc', cr_idx)
+    output_data(train_result, test_result, 'adv_fc'+ "_" + DISCRIMINATOR_LAYER_NUM + "_" + LEARNING_RATE[2:]+"_" + DISCRIMINATOR_ALPHA[2:] + "_" + PHASE1_EPOCH + "_"+ PHASE2_EPOCH , cr_idx)
 
     cr_idx = cr_idx + 1
 

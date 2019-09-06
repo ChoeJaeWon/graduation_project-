@@ -17,19 +17,13 @@ def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
         else:
             layer = tf.concat([layer, LSTM_model(S[gen_idx], E[gen_idx], True)], axis=1)
 
-    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
-    Y = tf.transpose(Y, perm=[1, 0])
-
     train_MSE = MSE(Y, layer)
-    cost_MAE = MAE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
-    cost_MSE = MSE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
-    cost_MAPE = MAPE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
+    cost_MAE = MAE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
+    cost_MSE = MSE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
+    cost_MAPE = MAPE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
 
-    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
-    Y = tf.transpose(Y, perm=[1, 0])
     # Pix2Pix
     DE = tf.concat([E[GEN_NUM - 1][CELL_SIZE-1], S[GEN_NUM - 1][CELL_SIZE-1]], axis=1)
-
 
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR,True)))
     loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))) + DISCRIMINATOR_ALPHA * train_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
@@ -65,9 +59,9 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_LSTMY')
 
-            if tr_idx > OPTIMIZED_EPOCH_LSTM + 10:
+            if tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH:
                 _ = sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
-            if (tr_idx <= OPTIMIZED_EPOCH_LSTM + 10) | (tr_idx > OPTIMIZED_EPOCH_LSTM + 30):
+            if (tr_idx <= OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH + PHASE2_EPOCH):
                 cost_MSE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
                 epoch_loss += loss
                 epoch_cost += cost_MSE_val
@@ -195,7 +189,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_lstm', cr_idx)
+    output_data(train_result, test_result, 'adv_lstm' + "_" + DISCRIMINATOR_LAYER_NUM + "_" + LEARNING_RATE[2:]+"_" + DISCRIMINATOR_ALPHA[2:] + "_" + PHASE1_EPOCH + "_"+ PHASE2_EPOCH , cr_idx)
 
     cr_idx=cr_idx+1
 
