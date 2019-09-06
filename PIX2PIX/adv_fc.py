@@ -76,6 +76,12 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
     for tr_idx in range(start_from, TRAIN_NUM):
         epoch_cost = 0.0
         epoch_loss = 0.0
+        '''
+        global_step_tr, epoch_cost, epoch_loss = train_generator_all(BATCH_NUM,global_step_tr,epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_mse_only(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_g_loss_only(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        global_step_tr, epoch_cost, epoch_loss = train_discriminator(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost)
+        '''
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             #if LATENT_VECTOR_FLAG:
@@ -152,14 +158,70 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
     return global_step_te
 
-def train_generator_mse():
-    return
-def train_mse_only():
-    return
-def train_generator_only():
-    return
-def train_discriminator():
-    return
+def train_generator_all(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost):
+    for ba_idx in range(BATCH_NUM):
+        # Batch Slice
+        S_train = batch_slice(S_data, train_idx, ba_idx, 'ADV_FC')
+        E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
+        Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
+
+        cost_MSE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MSE_hist, train_G, loss_G],
+                                                            feed_dict={S: S_train, E: E_train, Y: Y_train,
+                                                                       BA: True, DR: FC_TR_KEEP_PROB,
+                                                                       DISCRIMINATOR_BA: True,
+                                                                       DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+        epoch_loss += loss
+        epoch_cost += cost_MSE_val
+        writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+
+        global_step_tr += 1
+    return global_step_tr, epoch_loss, epoch_cost
+
+def train_mse_only(BATCH_NUM, global_step_tr, epoch_loss, epoch_cost):
+    for ba_idx in range(BATCH_NUM):
+        # Batch Slice
+        S_train = batch_slice(S_data, train_idx, ba_idx, 'ADV_FC')
+        E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
+        Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
+
+        cost_MSE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MSE_hist, train_G_MSE, loss_G],
+                                                            feed_dict={S: S_train, E: E_train, Y: Y_train,
+                                                                       BA: True, DR: FC_TR_KEEP_PROB,
+                                                                       DISCRIMINATOR_BA: True,
+                                                                       DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+        epoch_loss += loss
+        epoch_cost += cost_MSE_val
+        writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+
+        global_step_tr += 1
+    return global_step_tr, epoch_loss, epoch_cost
+
+def train_g_loss_only(BATCH_NUM, global_step_tr,  epoch_loss, epoch_cost):
+    for ba_idx in range(BATCH_NUM):
+        # Batch Slice
+        S_train = batch_slice(S_data, train_idx, ba_idx, 'ADV_FC')
+        E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
+        Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
+        cost_MSE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MSE_hist, train_G_Gen, loss_G], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+        # print(sess.run(vars_G[2]))
+        # print(sess.run(variables1[0]))
+        epoch_loss += loss
+        epoch_cost += cost_MSE_val
+        writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+        global_step_tr += 1
+    return global_step_tr, epoch_loss, epoch_cost
+
+def train_discriminator(BATCH_NUM, global_step_tr,  epoch_loss, epoch_cost):
+    for ba_idx in range(BATCH_NUM):
+        # Batch Slice
+        S_train = batch_slice(S_data, train_idx, ba_idx, 'ADV_FC')
+        E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
+        Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
+        _ = sess.run([train_D], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB,
+                                           DISCRIMINATOR_BA: True,
+                                           DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+        global_step_tr += 1
+    return global_step_tr, epoch_loss, epoch_cost
 
 ###################################################-MAIN-###################################################
 S_data, _,  E_data, Y_data = input_data(0b101)
