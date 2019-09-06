@@ -17,8 +17,8 @@ def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
         else:
             layer = tf.concat([layer, LSTM_model(S[gen_idx], E[gen_idx], True)], axis=1)
 
-    Y = tf.reshape(Y, [12,BATCH_SIZE])
-    layer = tf.reshape(layer, [12, BATCH_SIZE])
+    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
+    Y = tf.transpose(Y, perm=[1, 0])
 
     train_MSE = MSE(Y, layer)
     cost_MAE = MAE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
