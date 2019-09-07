@@ -73,7 +73,7 @@ WEEK_NUM = 4
 INTERVAL = 36 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 80 #traing 회수 [default 1000]
+TRAIN_NUM = 65 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
@@ -123,7 +123,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00005 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00006 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
