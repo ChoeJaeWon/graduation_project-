@@ -18,9 +18,9 @@ def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
             layer = tf.concat([layer, LSTM_model(S[gen_idx], E[gen_idx], True)], axis=1)
 
     train_MSE = MSE(Y, layer)
-    cost_MAE = MAE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
-    cost_MSE = MSE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
-    cost_MAPE = MAPE(Y[:][TIME_STAMP - 1], layer[:][TIME_STAMP - 1])
+    cost_MAE = MAE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
+    cost_MSE = MSE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
+    cost_MAPE = MAPE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
 
     # Pix2Pix
     DE = tf.concat([E[GEN_NUM - 1][CELL_SIZE-1], S[GEN_NUM - 1][CELL_SIZE-1]], axis=1)
