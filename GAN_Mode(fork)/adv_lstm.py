@@ -72,6 +72,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
             train_result.append(epoch_cost / BATCH_NUM)
             print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
+            print("G_loss %d: %lf" % (tr_idx, epoch_loss / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
             if MASTER_SAVE_FLAG:
                 print("Saving network...")
