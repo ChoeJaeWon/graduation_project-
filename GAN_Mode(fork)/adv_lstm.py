@@ -136,7 +136,6 @@ S_data, _, E_data,Y_data= input_data(0b101)
 cr_idx = 0
 for train_idx, test_idx in Week_CrossValidation():
     print('CROSS VALIDATION: %d' % cr_idx)
-
     train_result = []
     test_result = []
 
@@ -190,7 +189,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + str(DISCRIMINATOR_ALPHA)[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) , cr_idx)
+    output_data(train_result, test_result, 'adv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx)
 
     cr_idx=cr_idx+1
 
