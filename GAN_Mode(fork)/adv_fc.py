@@ -224,7 +224,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_fc'+ "_" + DISCRIMINATOR_LAYER_NUM + "_" + LEARNING_RATE[2:]+"_" + DISCRIMINATOR_ALPHA[2:] + "_" + PHASE1_EPOCH + "_"+ PHASE2_EPOCH , cr_idx)
+    output_data(train_result, test_result, 'adv_fc'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + str(DISCRIMINATOR_ALPHA)[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) , cr_idx)
 
     cr_idx = cr_idx + 1
 

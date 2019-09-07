@@ -123,7 +123,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00007 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.0001 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
