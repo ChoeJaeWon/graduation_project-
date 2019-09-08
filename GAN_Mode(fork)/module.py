@@ -79,7 +79,7 @@ SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 4 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
-LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
+LEARNING_RATE = 0.01 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
@@ -123,7 +123,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00006 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00009 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
@@ -525,7 +525,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     #train output
     if not os.path.exists(RESULT_DIR):
         os.makedirs(RESULT_DIR)
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -534,7 +534,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):
@@ -542,4 +542,14 @@ def output_data(train_result, test_result, file_name, cr_idx):
 
     outputfile.close()
 
+def output_result(final_result, file_name, cr_idx):
+    resultfile = open(RESULT_DIR + file_name + 'result' + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
 
+    if cr_idx == 4:
+        for te_idx in range(len(final_result[0])):
+            output.writerow([str(final_result[0][te_idx]), str(final_result[1][te_idx]), str(final_result[2][te_idx]), str(final_result[3][te_idx])])
+    else:
+        print("cannot save result, cross num and iteration num must be 4")
+
+    resultfile.close()
