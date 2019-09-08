@@ -157,7 +157,7 @@ def train_discriminator():
 
 ###################################################-MAIN-###################################################
 _, C_data, E_data, Y_data = input_data(0b011)
-final_result = []
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)  # 35387 / 12 = 2949
 for train_idx, test_idx in Week_CrossValidation():

@@ -132,7 +132,7 @@ def train_discriminator():
 ###################################################-MAIN-###################################################
 
 S_data, _, E_data,Y_data= input_data(0b101)
-final_result = []
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
 cr_idx = 0
 for train_idx, test_idx in Week_CrossValidation():
