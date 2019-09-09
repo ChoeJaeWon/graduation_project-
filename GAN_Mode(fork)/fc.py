@@ -86,6 +86,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
         global_step_te+=1
 
     test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
+    final_result[cr_idx].append(mape / BATCH_NUM)
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
 
     return global_step_te
@@ -95,7 +96,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
-
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
@@ -153,3 +154,5 @@ for train_idx, test_idx in Week_CrossValidation():
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
+
+output_result(final_result, 'fc' + "_", cr_idx)

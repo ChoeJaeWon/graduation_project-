@@ -109,7 +109,6 @@ FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
 LAST_LAYER_SIZE = 8
 
 #Hyper Parameter(LSTM)
-LSTM_TRAIN_NUM = 10 #lstm의 training 수
 HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
@@ -117,13 +116,13 @@ GEN_NUM = 12 #generator의 개수
 
 #Hyper Parameter(Discriminator)
 DISCRIMINATOR_INPUT_NUM = 107 #discriminator conv 이면 83 FC 이면 84
-DISCRIMINATOR_LAYER_NUM = 4
-DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 256, 128, 64, 1]
+DISCRIMINATOR_LAYER_NUM = 5
+DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 512, 128, 256, 64, 1]
 DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00006 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00009 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
@@ -525,7 +524,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     #train output
     if not os.path.exists(RESULT_DIR):
         os.makedirs(RESULT_DIR)
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -534,7 +533,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    outputfile = open(RESULT_DIR + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
 
     for te_idx in range(len(test_result)):
@@ -542,4 +541,18 @@ def output_data(train_result, test_result, file_name, cr_idx):
 
     outputfile.close()
 
+def output_result(final_result, file_name, cr_idx):
+    resultfile = open(RESULT_DIR + file_name + 'result' + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
 
+    if cr_idx == 4:
+        for te_idx in range(len(final_result[0])):
+            mean_result = 0.0
+            for cr_idx in range(CROSS_ITERATION_NUM):
+                mean_result += final_result[cr_idx][te_idx]
+            mean_result /= 4.0
+            output.writerow([str(final_result[0][te_idx]), str(final_result[1][te_idx]), str(final_result[2][te_idx]), str(final_result[3][te_idx]), str(mean_result)])
+    else:
+        print("cannot save result, cross num and iteration num must be 4")
+
+    resultfile.close()
