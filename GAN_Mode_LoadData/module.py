@@ -76,7 +76,7 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 1 #traing 회수 [default 1000]
+TRAIN_NUM = 65 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
@@ -569,7 +569,7 @@ def output_result(final_result, file_name, cr_idx):
             total_result.append(mean_result)
             row.append(str(mean_result))
             output.writerow(row)
-        output.writerow(['index(Excel):', str(total_result.index(min(total_result))+1),'min_value:',str(min(total_result))])
+        output.writerow(['epoch(Excel):', str(total_result.index(min(total_result))+1),'min_value:',str(min(total_result))])
     else:
         print("cannot save result, cross num and iteration num must be 20")
 
