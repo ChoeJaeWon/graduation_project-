@@ -123,6 +123,7 @@ def test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE
         global_step_te += 1
 
     test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
+    final_result[cr_idx].append(mape)
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
     return global_step_te
 
@@ -138,7 +139,7 @@ def train_discriminator():
 
 ###################################################-MAIN-###################################################
 S_data, C_data, E_data,Y_data= input_data(0b111)
-
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
@@ -206,3 +207,5 @@ for train_idx, test_idx in Week_CrossValidation():
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
+
+output_result(final_result, 'adv_conv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx)

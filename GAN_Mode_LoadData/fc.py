@@ -80,6 +80,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     global_step_te+=1
 
     test_result.append([mae, mse , mape])
+    final_result[cr_idx].append(mape)
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
 
     return global_step_te
@@ -89,6 +90,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
 DIR = "./index/"
 if not os.path.exists(DIR):
@@ -162,3 +164,5 @@ for train_idx, test_idx in load_Data():
     tf.reset_default_graph()
 
     output_data(train_result, test_result, 'fc_exo_5layer', cr_idx)
+
+output_result(final_result, 'fc' + "_", cr_idx)

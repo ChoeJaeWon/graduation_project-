@@ -51,6 +51,7 @@ FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 RESULT_DIR = './Result/'
+CV_RESULT_DIR = './Result/CV/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 10
 OPTIMIZED_EPOCH_CONV = 30
@@ -75,11 +76,11 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 1 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 4 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_ITERATION_NUM = 20 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
@@ -549,6 +550,30 @@ def output_data(train_result, test_result, file_name, cr_idx):
         output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
 
     outputfile.close()
+
+def output_result(final_result, file_name, cr_idx):
+    if not os.path.exists(CV_RESULT_DIR):
+        os.makedirs(CV_RESULT_DIR)
+    resultfile = open(CV_RESULT_DIR + file_name + 'result' +'_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    if cr_idx == 19 == (CROSS_ITERATION_NUM-1):
+        total_result = []
+        for te_idx in range(len(final_result[0])):
+            mean_result = 0.0
+            row = []
+            for cr_idx in range(CROSS_ITERATION_NUM):
+                mean_result += final_result[cr_idx][te_idx]
+                row.append(str(final_result[cr_idx][te_idx]))
+            mean_result /= 20.0
+            total_result.append(mean_result)
+            row.append(str(mean_result))
+            output.writerow(row)
+        output.writerow(['index(Excel):', str(total_result.index(min(total_result))+1),'min_value:',str(min(total_result))])
+    else:
+        print("cannot save result, cross num and iteration num must be 20")
+
+    resultfile.close()
 
 def Peek_Data():
     train_idx = [[] for _ in range(TEST_CASE_NUM)]
