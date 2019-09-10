@@ -17,15 +17,20 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
             else:
                 temp = tf.concat([temp, tf.reshape(CNN_model(C[gen_idx][cell_idx], BA, True), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
         if gen_idx == 0:
-            layer = LSTM_model(temp, E[gen_idx])
+            layer = tf.reshape(LSTM_model(temp, E[gen_idx]), [1, BATCH_SIZE])
         else:
-            layer = tf.concat([layer, LSTM_model(temp, E[gen_idx], True)], axis=1)
+            layer = tf.concat([layer, tf.reshape(LSTM_model(temp, E[gen_idx], True) , [1, BATCH_SIZE])], axis=0)
 
+    layer = tf.reshape(layer, [GEN_NUM, BATCH_SIZE])
+    Y = tf.reshape(Y, [GEN_NUM, BATCH_SIZE])
 
     train_MSE = MSE(Y, layer)
-    cost_MAE = MAE(Y[:,GEN_NUM - 1], layer[:,GEN_NUM - 1])
-    cost_MSE = MSE(Y[:,GEN_NUM - 1], layer[:,GEN_NUM - 1])
-    cost_MAPE = MAPE(Y[:,GEN_NUM - 1], layer[:,GEN_NUM - 1])
+    cost_MAE = MAE(Y[GEN_NUM - 1], layer[GEN_NUM - 1])
+    cost_MSE = MSE(Y[GEN_NUM - 1], layer[GEN_NUM - 1])
+    cost_MAPE = MAPE(Y[GEN_NUM - 1], layer[GEN_NUM - 1])
+
+    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
+    Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
     # Pix2Pix
     DE = tf.concat([E[GEN_NUM-1][TIME_STAMP - 1], C[GEN_NUM - 1, CELL_SIZE-1, :, 2, :, 0]], axis=1)
@@ -66,7 +71,7 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MA
             #if LATENT_VECTOR_FLAG:
             C_train = batch_slice(C_data, train_idx, ba_idx, 'ADV_CONV', CELL_SIZE)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_LSTM', 1)
-            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_LSTMY')
+            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
             if tr_idx > OPTIMIZED_EPOCH_CONV_LSTM + PHASE1_EPOCH:
                 _ = sess.run([train_D], feed_dict={ C:C_train, E:E_train, Y: Y_train, BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
@@ -107,8 +112,8 @@ def test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE
         # if LATENT_VECTOR_FLAG:
         C_test = batch_slice(C_data, test_idx, ba_idx, 'ADV_CONV', CELL_SIZE)
         E_test = batch_slice(E_data, test_idx, ba_idx, 'ADV_LSTM', 1)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_LSTMY')
-
+        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_FC')
+        
         cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
         mae += cost_MAE_val
         mse += cost_MSE_val
@@ -121,6 +126,7 @@ def test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE
         global_step_te += 1
 
     test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
+    final_result[cr_idx].append(mape / BATCH_NUM)
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
     return global_step_te
 
@@ -136,7 +142,7 @@ def train_discriminator():
 
 ###################################################-MAIN-###################################################
 S_data, C_data, E_data,Y_data= input_data(0b111)
-
+final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in Week_CrossValidation():
@@ -147,7 +153,7 @@ for train_idx, test_idx in Week_CrossValidation():
 
     C = tf.placeholder("float32", [GEN_NUM, CELL_SIZE, None, SPARTIAL_NUM, TEMPORAL_NUM, 1])  # cell_size, batch_size
     E = tf.placeholder("float32", [GEN_NUM, CELL_SIZE, None, EXOGENOUS_NUM])  # cell_size, batch_size
-    Y = tf.placeholder("float32", [None, GEN_NUM])
+    Y = tf.placeholder("float32", [GEN_NUM, None, 1])
     BA = tf.placeholder(tf.bool)
     DISCRIMINATOR_BA = tf.placeholder(tf.bool)
     DISCRIMINATOR_DR = tf.placeholder(tf.float32)
@@ -204,3 +210,5 @@ for train_idx, test_idx in Week_CrossValidation():
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
+
+output_result(final_result, 'adv_conv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx)
