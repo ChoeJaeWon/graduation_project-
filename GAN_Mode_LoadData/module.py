@@ -72,25 +72,26 @@ LAST_MONTH = 10
 ONE_DAY = 288
 ONE_WEEK = ONE_DAY * 7
 WEEK_NUM = 4
-INTERVAL = 36 #adv conv lstm에서 overlap방지
+INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 1 #traing 회수 [default 1000]
+TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 4 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
+TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
 #Hyper Parameter(FC)
-FC_LAYER_NUM = 5 #fc layer의 깊이 [default 3]
+FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
 VECTOR_SIZE = 95 #fc와 lstm에 들어가는 vector의 크기 [default 83]
 TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
 EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
-LAYER_UNIT_NUM = [VECTOR_SIZE, 512, 128, 256, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
+LAYER_UNIT_NUM = [VECTOR_SIZE, 128, 256, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
 FC_DROPOUT = True #fc 에서 drop out 을 사용할것인지 [default True]
 FC_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
@@ -139,7 +140,7 @@ DISCONV_LAST_LAYER_SIZE = 8 #필터 거치고
 #Hyper Parameter(PEEK_DATA)
 TEST_CASE_NUM = 20
 TEST_RATIO = 10
-TIME_INTERVAL = 36
+TIME_INTERVAL = 24
 DATA_SIZE = 35400-TIME_STAMP
 
 fc_weights = [] #fc weight들의 크기는 layer의 길이에 따라 결정된다.
@@ -280,7 +281,7 @@ def CNN_model(X, BA, is_reuse=False):
             if POOLING == True and layer_idx != (CONV_LAYER_NUM-1): #마지막 layer는 pooling안함
                 layer = tf.nn.avg_pool(layer, ksize=[1,2,2,1], strides=[1,1,1,1])
 
-        layer = tf.reshape(layer, shape=[BATCH_SIZE, CHANNEL_NUM[CONV_LAYER_NUM]*LAST_LAYER_SIZE])
+        layer = tf.reshape(layer, shape=[-1, CHANNEL_NUM[CONV_LAYER_NUM]*LAST_LAYER_SIZE])
         layer = tf.matmul(layer, convfc_weights[0])
         layer = tf.nn.relu(layer)
 
@@ -394,7 +395,7 @@ def Discriminator_model_Conv(Z, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=
 #da_idx는 cross validation해서 나온 idx의 집합
 #ba_idx는 batch의 idx
 #cell size는 conv+lstm에서 고려해줘야할 conv의 수
-def batch_slice(data, data_idx, batch_idx, slice_type, cell_size=1):
+def batch_slice(data, data_idx, batch_idx, slice_type, cell_size=1, BATCH_SIZE = 300):
     #fc X input data와 fc, conv의 y output data
     if slice_type == 'FC':
         slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]]

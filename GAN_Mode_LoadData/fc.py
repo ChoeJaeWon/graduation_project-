@@ -65,28 +65,22 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 #testing 해준다.
 def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
     BATCH_NUM = int(len(test_idx))
-    mae = 0.0
-    mse = 0.0
-    mape = 0.0
-    for ba_idx in range(BATCH_NUM):
-        # Batch Slice
-        S_test = np.reshape(S_data[test_idx[ba_idx]], (1, 12))
-        E_test = np.reshape(E_data[test_idx[ba_idx]], (1, 83))
-        Y_test = np.reshape(Y_data[test_idx[ba_idx]], (1, 1))
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
-        mae += cost_MAE_val
-        mse += cost_MSE_val
-        mape += cost_MAPE_val
+    # Batch Slice
+    S_test = batch_slice(S_data, test_idx, 0, 'FC', 1, TEST_BATCH_SIZE)
+    E_test = batch_slice(E_data, test_idx, 0, 'FC', 1, TEST_BATCH_SIZE)
+    Y_test = batch_slice(Y_data, test_idx, 0, 'FC', 1, TEST_BATCH_SIZE)
 
-        writer_test.add_summary(cost_MAE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MSE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
+    mae, mse, mape, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
 
-        global_step_te+=1
+    writer_test.add_summary(cost_MAE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MSE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
 
-    test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
-    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
+    global_step_te+=1
+
+    test_result.append([mae, mse , mape])
+    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
 
     return global_step_te
 
@@ -104,20 +98,22 @@ cr_idx =-1
 for train_idx, test_idx in load_Data():
     cr_idx = cr_idx + 1
 
-
-    #Index To File
     '''
-    outputfile = open(DIR + "tr_" + str(cr_idx) + '.csv', 'w', newline='')
+    #Index To File
+
+    outputfile = open(DIR + "tr" + str(cr_idx) + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
     for i in range(len(train_idx)):
         output.writerow([str(train_idx[i])])
     outputfile.close()
 
-    outputfile = open(DIR + "te_" + str(cr_idx) + '.csv', 'w', newline='')
+    outputfile = open(DIR + "te" + str(cr_idx) + '.csv', 'w', newline='')
     output = csv.writer(outputfile)
     for i in range(len(test_idx)):
         output.writerow([str(test_idx[i])])
     outputfile.close()
+
+    continue
     '''
 
     train_result = []

@@ -22,12 +22,6 @@ def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     cost_MSE = MSE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
     cost_MAPE = MAPE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
 
-<<<<<<< HEAD
-
-    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
-    Y = tf.transpose(Y, perm=[1, 0])
-=======
->>>>>>> 664a71ad1d7bd8560a24ee1cbf3ce30661722c7d
     # Pix2Pix
     DE = tf.concat([E[GEN_NUM - 1][CELL_SIZE-1], S[GEN_NUM - 1][CELL_SIZE-1]], axis=1)
 

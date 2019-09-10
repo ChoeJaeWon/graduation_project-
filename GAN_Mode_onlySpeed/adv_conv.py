@@ -32,9 +32,9 @@ def model_base(C, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
 
 
     loss_D = -tf.reduce_mean(
-        tf.log(Discriminator_model(Y, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(
-            1 - Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
-    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, E[TIME_STAMP-1], DISCRIMINATOR_BA,
+        tf.log(Discriminator_model(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(
+            1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
+    loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA,
                                                         DISCRIMINATOR_DR, True)))  + DISCRIMINATOR_ALPHA * train_MSE # MSE 는 0~ t까지 있어봤자 같은 값이다.
     '''
     loss_G_MSE = -tf.reduce_mean(tf.log(Discriminator_model(layer, E[TIME_STAMP - 1], DISCRIMINATOR_BA,

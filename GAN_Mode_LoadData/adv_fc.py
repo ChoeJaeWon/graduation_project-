@@ -12,11 +12,11 @@ import os
 def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     for gen_idx in range(GEN_NUM):
         if gen_idx == 0:
-            layer = tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR), [1, BATCH_SIZE])  # 마지막에 conv 에서는 timestamp
+            layer = tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR), [1, -1])  # 마지막에 conv 에서는 timestamp
         else:
-            layer = tf.concat([layer, tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR, True), [1, BATCH_SIZE])], axis=0)
+            layer = tf.concat([layer, tf.reshape(FC_model(S[gen_idx], E[gen_idx], BA, DR, True), [1, -1])], axis=0)
 
-    Y = tf.reshape(Y, [12, BATCH_SIZE]) #일단 통일시켜놨기 떄문에 어쩔 수 없는 부분
+    Y = tf.reshape(Y, [12, -1]) #일단 통일시켜놨기 떄문에 어쩔 수 없는 부분
     # 3차원 오차, MAE, MAPE는 Train 에서는 필요 없음
     # cost_MAE = MAE(Y, layer)
     train_MSE = MSE(Y, layer)
@@ -121,15 +121,15 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
 #testing 해준다.
 def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
-    BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
+    BATCH_NUM = int(len(test_idx))
     mae = 0.0
     mse = 0.0
     mape = 0.0
     for ba_idx in range(BATCH_NUM):
         #if LATENT_VECTOR_FLAG:
-        S_test = batch_slice(S_data, test_idx, ba_idx, 'ADV_FC')
-        E_test = batch_slice(E_data, test_idx, ba_idx, 'ADV_FC')
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_FC')
+        S_test = batch_slice(S_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
+        E_test = batch_slice(E_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
+        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
 
         cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
         mae += cost_MAE_val
@@ -142,8 +142,8 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
         global_step_te += 1
 
-    test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
-    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
+    test_result.append([mae , mse , mape ])
+    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
     return global_step_te
 
 def train_generator_mse():
@@ -159,8 +159,7 @@ def train_discriminator():
 S_data, _,  E_data, Y_data = input_data(0b101)
 
 cr_idx = 0
-kf = KFold(n_splits=CROSS_NUM, shuffle=True) #35387 / 12 = 2949
-for train_idx, test_idx in Week_CrossValidation():
+for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
 
     train_result = []
