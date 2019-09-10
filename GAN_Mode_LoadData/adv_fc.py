@@ -127,22 +127,21 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     mae = 0.0
     mse = 0.0
     mape = 0.0
-    for ba_idx in range(BATCH_NUM):
-        #if LATENT_VECTOR_FLAG:
-        S_test = batch_slice(S_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
-        E_test = batch_slice(E_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_FC', 1, TEST_BATCH_SIZE)
+    #if LATENT_VECTOR_FLAG:
+    S_test = batch_slice(S_data, test_idx, 0, 'ADV_FC', 1, TEST_BATCH_SIZE)
+    E_test = batch_slice(E_data, test_idx, 0, 'ADV_FC', 1, TEST_BATCH_SIZE)
+    Y_test = batch_slice(Y_data, test_idx, 0, 'ADV_FC', 1, TEST_BATCH_SIZE)
 
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
-        mae += cost_MAE_val
-        mse += cost_MSE_val
-        mape += cost_MAPE_val
+    cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
+    mae += cost_MAE_val
+    mse += cost_MSE_val
+    mape += cost_MAPE_val
 
-        writer_test.add_summary(cost_MAE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MSE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MAE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MSE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
 
-        global_step_te += 1
+    global_step_te += 1
 
     test_result.append([mae , mse , mape ])
     final_result[cr_idx].append(mape)

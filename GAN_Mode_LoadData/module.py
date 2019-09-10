@@ -557,7 +557,7 @@ def output_result(final_result, file_name, cr_idx):
     resultfile = open(CV_RESULT_DIR + file_name + 'result' +'_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
     output = csv.writer(resultfile)
 
-    if cr_idx == 19 == (CROSS_ITERATION_NUM-1):
+    if cr_idx == CROSS_ITERATION_NUM:
         total_result = []
         for te_idx in range(len(final_result[0])):
             mean_result = 0.0
