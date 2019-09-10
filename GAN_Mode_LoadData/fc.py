@@ -32,22 +32,24 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
     global_step_tr = 0
     global_step_te = 0
     for tr_idx in range(start_from, TRAIN_NUM):
-        epoch_cost = 0.0
+        epoch_mse_cost = 0.0
+        epoch_mape_cost = 0.0
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             S_train = batch_slice(S_data, train_idx, ba_idx, 'FC', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'FC', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'FC', 1)
 
-            cost_MSE_val, cost_MSE_hist_val, _= sess.run([cost_MAPE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
-            epoch_cost += cost_MSE_val
+            cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _= sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, optimal], feed_dict={S:S_train, E:E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB})
+            epoch_mse_cost += cost_MSE_val
+            epoch_mape_cost += cost_MAPE_val
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
 
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
-            train_result.append(epoch_cost/BATCH_NUM)
-            print("Train Cost %d: %lf" % (tr_idx, epoch_cost / BATCH_NUM))
+            train_result.append([epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM])
+            print("Train Cost %d: %lf %lf" % (tr_idx, epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
 
             print("Saving network...")

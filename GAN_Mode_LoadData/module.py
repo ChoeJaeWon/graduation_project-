@@ -61,9 +61,9 @@ PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
 #FLAG
-RESTORE_FLAG = False #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
-LATENT_VECTOR_FLAG = False #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
+RESTORE_FLAG = True #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
+LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
@@ -76,11 +76,11 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 65 #traing 회수 [default 1000]
+TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 20 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_ITERATION_NUM = 7 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
@@ -538,7 +538,7 @@ def output_data(train_result, test_result, file_name, cr_idx):
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
-        output.writerow([str(train_result[tr_idx])])
+        output.writerow([str(train_result[tr_idx][0]), str(train_result[tr_idx][0])])
 
     outputfile.close()
 
