@@ -98,9 +98,9 @@ DIR = "./index/"
 if not os.path.exists(DIR):
     os.makedirs(DIR)
 
-cr_idx =-1
+cr_idx =0
 for train_idx, test_idx in load_Data():
-    cr_idx = cr_idx + 1
+
 
     '''
     #Index To File
@@ -166,5 +166,8 @@ for train_idx, test_idx in load_Data():
     tf.reset_default_graph()
 
     output_data(train_result, test_result, 'fc_exo_5layer', cr_idx)
+    cr_idx = cr_idx + 1
+    if (cr_idx == CROSS_ITERATION_NUM):
+        break
 
 output_result(final_result, 'fc' + "_", cr_idx)
