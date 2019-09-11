@@ -61,9 +61,9 @@ PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
 #FLAG
-RESTORE_FLAG = True #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
-LATENT_VECTOR_FLAG = True #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
+RESTORE_FLAG = False #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
+LATENT_VECTOR_FLAG = False #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
@@ -76,7 +76,7 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 95 #traing 회수 [default 1000]
+TRAIN_NUM = 100 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -88,11 +88,11 @@ TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
 #Hyper Parameter(FC)
-FC_LAYER_NUM = 4 #fc layer의 깊이 [default 3]
+FC_LAYER_NUM = 5 #fc layer의 깊이 [default 3]
 VECTOR_SIZE = 95 #fc와 lstm에 들어가는 vector의 크기 [default 83]
 TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
 EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
-LAYER_UNIT_NUM = [VECTOR_SIZE, 128, 256, 64, 1] #fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
+LAYER_UNIT_NUM = [VECTOR_SIZE, 512, 128, 256, 64, 1]#fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
 FC_DROPOUT = True #fc 에서 drop out 을 사용할것인지 [default True]
 FC_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
@@ -106,7 +106,7 @@ TEMPORAL_NUM = 12 #conv에서 고려할 시간 default 12]
 UP_STREAM_NUM = 2 #conv에서 고려할 이후의 도로 개수들 [default 2]
 DOWN_STREAM_NUM = 2 #conv에서 고려할 이전의 도로 개수들 [default 2]
 SPARTIAL_NUM = DOWN_STREAM_NUM+UP_STREAM_NUM+1 #conv에서 고려할 총 도로의 수 + 타겟도로[default 13]
-CHANNEL_NUM = [1, 64, 16, 32] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
+CHANNEL_NUM = [1, 128, 32, 64] #conv에서 고려해줄 channel 수 [default 1 64 16 32] **주의 1로 시작해서 1로 끝나야함 input과 ouput channel은 1개씩이기 때문
 FILTER_SIZE_TEMPORAL = [3, 1, 3] #시간의 filter size [default 3 1 3]
 FILTER_SIZE_SPATIAL = [3, 1, 3] #공간의 filter size [default 3 1 3]
 LAST_LAYER_SIZE = 8
@@ -120,8 +120,8 @@ GEN_NUM = 12 #generator의 개수
 
 #Hyper Parameter(Discriminator)
 DISCRIMINATOR_INPUT_NUM = 107 #discriminator conv 이면 83 FC 이면 84
-DISCRIMINATOR_LAYER_NUM = 4
-DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 256, 128, 64, 1]
+DISCRIMINATOR_LAYER_NUM = 5
+DISCRIMINATOR_LAYER_UNIT_NUM = [DISCRIMINATOR_INPUT_NUM, 512, 128, 256, 64, 1]
 DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
