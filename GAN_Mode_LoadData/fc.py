@@ -67,7 +67,6 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 #testing 해준다.
 def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
     BATCH_NUM = int(len(test_idx))
-
     # Batch Slice
     S_test = batch_slice(S_data, test_idx, 0, 'FC', 1, TEST_BATCH_SIZE)
     E_test = batch_slice(E_data, test_idx, 0, 'FC', 1, TEST_BATCH_SIZE)

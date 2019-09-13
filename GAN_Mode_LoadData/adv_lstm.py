@@ -55,7 +55,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             #if LATENT_VECTOR_FLAG:
             S_train = batch_slice(S_data, train_idx, ba_idx, 'LSTM', 1)
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
-            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
+            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC', 1)
 
             if tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH:
                 _ = sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
@@ -87,26 +87,13 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
 #testing 해준다.
 def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result):
-    BATCH_NUM = int(len(test_idx) / BATCH_SIZE)
-    mae = 0.0
-    mse = 0.0
-    mape = 0.0
-
+    BATCH_NUM = int(len(test_idx))
     # Batch Slice
     # if LATENT_VECTOR_FLAG:
-    S_test = batch_slice(S_data, test_idx, 0, 'LSTM', 1)
-    E_test = batch_slice(E_data, test_idx, 0, 'LSTM', 1)
-    Y_test = batch_slice(Y_data, test_idx, 0, 'ADV_FC')
-    '''
-    else:
-        S_test = batch_slice(S_data, test_idx, ba_idx, 'LSTM', 1)
-        E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
-    '''
-    cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test,DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
-    mae += cost_MAE_val
-    mse += cost_MSE_val
-    mape += cost_MAPE_val
+    S_test = batch_slice(S_data, test_idx, 0, 'LSTM', 1, TEST_BATCH_SIZE)
+    E_test = batch_slice(E_data, test_idx, 0, 'LSTM', 1, TEST_BATCH_SIZE)
+    Y_test = batch_slice(Y_data, test_idx, 0, 'ADV_FC',1, TEST_BATCH_SIZE)
+    mae, mse, mape, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test,DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
 
     writer_test.add_summary(cost_MAE_hist_val, global_step_te)
     writer_test.add_summary(cost_MSE_hist_val, global_step_te)
@@ -114,9 +101,9 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
     global_step_te += 1
 
-    test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
+    test_result.append([mae , mse , mape ])
     final_result[cr_idx].append(mape)
-    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM))
+    print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
     return global_step_te
 
 def train_generator_mse():
@@ -134,7 +121,7 @@ S_data, _, E_data,Y_data= input_data(0b101)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
 cr_idx = 0
-for train_idx, test_idx in Week_CrossValidation():
+for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
     train_result = []
     test_result = []
