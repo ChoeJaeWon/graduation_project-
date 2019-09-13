@@ -11,20 +11,16 @@ import os
 
 def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
 
-    for gen_idx in range(GEN_NUM):
-        if gen_idx == 0:
-            layer = LSTM_model(S[gen_idx], E[gen_idx])
-        else:
-            layer = tf.concat([layer, LSTM_model(S[gen_idx], E[gen_idx], True)], axis=1)
-
+    layer = LSTM_model_12(S, E)
+    Y = tf.reshape(Y, [12, -1])
+    Y = tf.transpose(Y, perm=[1, 0])
     train_MSE = MSE(Y, layer)
     cost_MAE = MAE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
     cost_MSE = MSE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
     cost_MAPE = MAPE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
 
-
     # Pix2Pix
-    DE = tf.concat([E[GEN_NUM - 1][CELL_SIZE-1], S[GEN_NUM - 1][CELL_SIZE-1]], axis=1)
+    DE = tf.concat([E[CELL_SIZE-1], S[CELL_SIZE-1]], axis=1)
 
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(Y, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR,True)))
     loss_G = -tf.reduce_mean(tf.log(Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True))) + DISCRIMINATOR_ALPHA * train_MSE  # MSE 는 0~ t까지 있어봤자 같은 값이다.
@@ -57,9 +53,9 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
         for ba_idx in range(BATCH_NUM):
             #Batch Slice
             #if LATENT_VECTOR_FLAG:
-            S_train = batch_slice(S_data, train_idx, ba_idx, 'ADV_LSTM', 1)
-            E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_LSTM', 1)
-            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_LSTMY')
+            S_train = batch_slice(S_data, train_idx, ba_idx, 'LSTM', 1)
+            E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
+            Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
             if tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH:
                 _ = sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
@@ -95,28 +91,28 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     mae = 0.0
     mse = 0.0
     mape = 0.0
-    for ba_idx in range(BATCH_NUM):
-        # Batch Slice
-        # if LATENT_VECTOR_FLAG:
-        S_test = batch_slice(S_data, test_idx, ba_idx, 'ADV_LSTM', 1)
-        E_test = batch_slice(E_data, test_idx, ba_idx, 'ADV_LSTM', 1)
-        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'ADV_LSTMY')
-        '''
-        else:
-            S_test = batch_slice(S_data, test_idx, ba_idx, 'LSTM', 1)
-            E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
-            Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
-        '''
-        cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test,DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
-        mae += cost_MAE_val
-        mse += cost_MSE_val
-        mape += cost_MAPE_val
 
-        writer_test.add_summary(cost_MAE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MSE_hist_val, global_step_te)
-        writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
+    # Batch Slice
+    # if LATENT_VECTOR_FLAG:
+    S_test = batch_slice(S_data, test_idx, 0, 'LSTM', 1)
+    E_test = batch_slice(E_data, test_idx, 0, 'LSTM', 1)
+    Y_test = batch_slice(Y_data, test_idx, 0, 'ADV_FC')
+    '''
+    else:
+        S_test = batch_slice(S_data, test_idx, ba_idx, 'LSTM', 1)
+        E_test = batch_slice(E_data, test_idx, ba_idx, 'LSTM', 1)
+        Y_test = batch_slice(Y_data, test_idx, ba_idx, 'LSTMY', 1)
+    '''
+    cost_MAE_val, cost_MSE_val, cost_MAPE_val, cost_MAE_hist_val, cost_MSE_hist_val, cost_MAPE_hist_val = sess.run([cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist], feed_dict={S:S_test, E:E_test, Y:Y_test,DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
+    mae += cost_MAE_val
+    mse += cost_MSE_val
+    mape += cost_MAPE_val
 
-        global_step_te += 1
+    writer_test.add_summary(cost_MAE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MSE_hist_val, global_step_te)
+    writer_test.add_summary(cost_MAPE_hist_val, global_step_te)
+
+    global_step_te += 1
 
     test_result.append([mae / BATCH_NUM, mse / BATCH_NUM, mape / BATCH_NUM])
     final_result[cr_idx].append(mape)
@@ -143,9 +139,9 @@ for train_idx, test_idx in Week_CrossValidation():
     train_result = []
     test_result = []
 
-    S = tf.placeholder("float32", [GEN_NUM, CELL_SIZE, None, TIME_STAMP]) #cell_size, batch_size
-    E = tf.placeholder("float32", [GEN_NUM, CELL_SIZE, None, EXOGENOUS_NUM]) #cell_size, batch_size
-    Y = tf.placeholder("float32", [None, GEN_NUM])
+    S = tf.placeholder("float32", [CELL_SIZE, None, TIME_STAMP]) #cell_size, batch_size
+    E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM]) #cell_size, batch_size
+    Y = tf.placeholder("float32", [GEN_NUM, None, 1])
     DISCRIMINATOR_BA = tf.placeholder(tf.bool)
     DISCRIMINATOR_DR = tf.placeholder(tf.float32)
 
