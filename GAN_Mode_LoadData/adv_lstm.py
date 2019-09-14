@@ -13,12 +13,15 @@ def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
 
     layer = LSTM_model_12(S, E)
     Y = tf.reshape(Y, [12, -1])
-    Y = tf.transpose(Y, perm=[1, 0])
+    layer = tf.reshape(layer, [12, -1])
+
     train_MSE = MSE(Y, layer)
     cost_MAE = MAE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
     cost_MSE = MSE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
     cost_MAPE = MAPE(Y[:,TIME_STAMP - 1], layer[:,TIME_STAMP - 1])
 
+    layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
+    Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
     # Pix2Pix
     DE = tf.concat([E[CELL_SIZE-1], S[CELL_SIZE-1]], axis=1)
 
