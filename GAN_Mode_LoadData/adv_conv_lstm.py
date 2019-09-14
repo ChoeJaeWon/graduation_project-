@@ -10,12 +10,12 @@ import os
 def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     for idx in range(CELL_SIZE):
         if idx == 0:
-            layer = tf.reshape(CNN_model(C[idx], BA), [1, BATCH_SIZE, TIME_STAMP])
+            layer = tf.reshape(CNN_model(C[idx], BA), [1, -1, TIME_STAMP])
         else:
-            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, BATCH_SIZE, TIME_STAMP])], axis=0)
+            layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, -1, TIME_STAMP])], axis=0)
     layer = LSTM_model_12(layer, E)
-    layer = tf.reshape(layer, [12, BATCH_SIZE])
-    Y = tf.reshape(Y, [12, BATCH_SIZE])
+    layer = tf.reshape(layer, [12, -1])
+    Y = tf.reshape(Y, [12, -1])
 
     train_MSE = MSE(Y, layer)
     cost_MAE = MAE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
@@ -26,7 +26,7 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
     # Pix2Pix
-    DE = tf.concat([E[GEN_NUM-1][TIME_STAMP - 1], C[GEN_NUM - 1, CELL_SIZE-1, :, 2, :, 0]], axis=1)
+    DE = tf.concat([E[TIME_STAMP - 1], C[CELL_SIZE-1, :, 2, :, 0]], axis=1)
 
     #지금은 일단 lstm 구조에 gan을 맞춘거라 cell_size는 timestamp라고 하지 않았음.
     loss_D = -tf.reduce_mean(tf.log(Discriminator_model(Y, DE , DISCRIMINATOR_BA, DISCRIMINATOR_DR)) + tf.log(1 - Discriminator_model(layer, DE, DISCRIMINATOR_BA, DISCRIMINATOR_DR, True)))
