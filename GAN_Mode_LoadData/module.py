@@ -471,7 +471,7 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size=1, BATCH_SIZE =
 
     #lstm의 output data(60분 후를 뽑아야 하기때문)
     elif slice_type == 'LSTMY':
-        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]+ CELL_SIZE-1]
+        slice_data = data[data_idx[batch_idx * BATCH_SIZE: (batch_idx + 1) * BATCH_SIZE]+ (CELL_SIZE-1)]
 
 
     elif slice_type == 'ADV_LSTMY':
@@ -607,12 +607,14 @@ def load_Data():
         for line in FileData:
             test_idx[i].append(int(line[0]))
         File.close()
+        test_idx[i] = np.array(test_idx[i], dtype="int64")
 
         File = open(DIR + "tr" + str(i) + ".csv", 'r')
         FileData = csv.reader(File)
         for line in FileData:
             train_idx[i].append(int(line[0]))
         File.close()
+        train_idx[i] = np.array(train_idx[i], dtype="int64")
 
     return zip(np.array(train_idx), np.array(test_idx))
 
