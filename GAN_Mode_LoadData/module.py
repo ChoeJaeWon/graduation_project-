@@ -55,8 +55,8 @@ CV_RESULT_DIR = './Result/CV/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 10
 OPTIMIZED_EPOCH_CONV = 30
-OPTIMIZED_EPOCH_LSTM = 10
-OPTIMIZED_EPOCH_CONV_LSTM = 10
+OPTIMIZED_EPOCH_LSTM = 30
+OPTIMIZED_EPOCH_CONV_LSTM = 30
 PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
@@ -76,7 +76,7 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 60 #traing 회수 [default 1000]
+TRAIN_NUM = 120 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 4 #cross validation의 spilit 수
@@ -113,7 +113,7 @@ LAST_LAYER_SIZE = 8
 
 #Hyper Parameter(LSTM)
 LSTM_TRAIN_NUM = 10 #lstm의 training 수
-HIDDEN_NUM = 32 #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = 64 #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 GEN_NUM = 12 #generator의 개수
@@ -307,6 +307,19 @@ def LSTM_model(S, E, is_reuse=False):
 
         outputs, _ = tf.nn.static_rnn(cell=lstm_cell, inputs=x, dtype= tf.float32 )
         #outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+        # Linear activation, using rnn inner loop last output
+    return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
+
+def multi_LSTM_model(S, E, isReuse = False):
+    with tf.variable_scope('generator_lstm', reuse=isReuse):
+        x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
+        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+
+        multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
+
+        outputs, _ = tf.nn.static_rnn(cell=multi_cell, inputs=x, dtype=tf.float32)
+        # outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
 
         # Linear activation, using rnn inner loop last output
     return tf.matmul(outputs[-1], lstm_weights[0]) + lstm_biases[0]
