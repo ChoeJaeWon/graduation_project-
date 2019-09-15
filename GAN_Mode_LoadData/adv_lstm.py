@@ -11,7 +11,7 @@ import os
 
 def model_base(S, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
 
-    layer = LSTM_model_12(S, E)
+    layer = multi_LSTM_model_12(S, E)
     print(layer)
     Y = tf.reshape(Y, [12, -1])
     layer = tf.reshape(layer, [12, -1])

@@ -338,7 +338,21 @@ def LSTM_model_12(S, E, is_reuse=False):
 
 
         # Linear activation, using rnn inner loop last output
-    return tf.matmul(outputs, lstm_weights[0]) + lstm_biases[0]
+    return tf.matmul(outputs, lstm_weights) + lstm_biases
+
+def multi_LSTM_model_12(S, E, isReuse = False):
+    with tf.variable_scope('generator_lstm', reuse=isReuse):
+        x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
+        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+
+        multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
+
+        outputs, _ = tf.nn.static_rnn(cell=multi_cell, inputs=x, dtype=tf.float32)
+        # outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
+
+        # Linear activation, using rnn inner loop last output
+    return tf.matmul(outputs, lstm_weights) + lstm_biases
 
 #discriminator 의 X는 y 와 predicted y 가 concatenated 되어서 들어온 13짜리 X입니다. 기존의 S랑 다름 -> 매우 중요, 또는 conv일떈 12짜리 예측 벡터
 def Discriminator_model(X, E, DISCRIMINATOR_BA, DISCRIMINATOR_DR, is_reuse=False):
