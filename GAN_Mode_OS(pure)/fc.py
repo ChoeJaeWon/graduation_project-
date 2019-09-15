@@ -87,7 +87,10 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     return global_step_te
 
 
-
+def speed_concat(S_data):
+    for row_idx in range(len(S_data)):
+        for cul_idx in range(12):
+            S_data[row_idx].append(S_data)
 
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
