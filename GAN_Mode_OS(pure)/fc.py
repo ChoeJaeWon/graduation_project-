@@ -88,9 +88,13 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
 
 def speed_concat(S_data):
+    concat_data = []
     for row_idx in range(len(S_data)):
+        concat_data.append([])
+        for idx in range(12):
+            concat_data[row_idx].append(S_data[row_idx][idx])
         for cul_idx in range(1,12):
-            S_data[row_idx].append(S_data[row_idx + cul_idx][11])
+            concat_data[row_idx].append(S_data[row_idx + cul_idx][11])
     return S_data
 
 
