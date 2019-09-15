@@ -89,8 +89,8 @@ TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 5 #fc layer의 깊이 [default 3]
-VECTOR_SIZE = 95 #fc와 lstm에 들어가는 vector의 크기 [default 83]
-TIME_STAMP = 12 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
+VECTOR_SIZE = 106 #fc와 lstm에 들어가는 vector의 크기 [default 83]
+TIME_STAMP = 23 #lstm과 fc의 vector에서 고려해주는 시간 [default 12]
 EXOGENOUS_NUM = VECTOR_SIZE-TIME_STAMP #exogenous로 들어가는 data의 개수 [default 73]
 LAYER_UNIT_NUM = [VECTOR_SIZE, 512, 128, 256, 64, 1]#fc에서 고려해줄 layer당 unit의 수 default[83, 64, 128, 64, 1]
 FC_BATCH_NORM = True #fc 에서 batch normalization 을 사용할것인지 [default True]
