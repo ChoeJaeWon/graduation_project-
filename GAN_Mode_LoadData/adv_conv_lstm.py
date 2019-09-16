@@ -13,7 +13,7 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
             layer = tf.reshape(CNN_model(C[idx], BA), [1, -1, TIME_STAMP])
         else:
             layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, -1, TIME_STAMP])], axis=0)
-    layer = LSTM_model_12(layer, E)
+    layer = multi_LSTM_model_12(layer, E)
     layer = tf.reshape(layer, [12, -1])
     Y = tf.reshape(Y, [12, -1])
 

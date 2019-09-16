@@ -17,10 +17,10 @@ result_dir_conv_lstm = 'preprocess_conv_lstm/' #if sequence is more than 1
 #sequence가 2이상이면 conv와 lstm이 함께 쓰이는 모델을 위한 preprocessing 으로써 preprocess_conv_lstm으로 이동합니다.
 #입력된 도로의 갯수가 안맞으면 indexing error가 뜹니다.
 #결과는 입력 순서에 sensitive하니 순서에 주의하세요
-after_m_x = ['1049443/x_data_1049443_5min_60min_60min_only_speed.csv' , '1063062/x_data_1063062_5min_60min_60min_only_speed.csv']
-before_m_x = ['2016209/x_data_2016209_5min_60min_60min_only_speed.csv' , '2046685/x_data_2046685_5min_60min_60min_only_speed.csv']
-after_m_y = ['1049443/y_data_1049443_5min_60min_60min.csv' , '1063062/y_data_1063062_5min_60min_60min.csv']
-before_m_y = ['2016209/y_data_2016209_5min_60min_60min.csv' , '2046685/y_data_2046685_5min_60min_60min.csv']
+after_m_x = ['2034458/x_data_2034458_5min_60min_60min_only_speed.csv' , '2008445/x_data_2008445_5min_60min_60min_only_speed.csv']
+before_m_x = ['2016376/x_data_2016376_5min_60min_60min_only_speed.csv' , '2016404/x_data_2016404_5min_60min_60min_only_speed.csv']
+after_m_y = ['2034458/y_data_2034458_5min_60min_60min.csv' , '2008445/y_data_2008445_5min_60min_60min.csv']
+before_m_y = ['2016376/y_data_2016376_5min_60min_60min.csv' , '2016404/y_data_2016404_5min_60min_60min.csv']
 xFile = '2016204/x_data_2016204_5min_60min_60min_only_speed.csv' #target link, storage path
 yFile = '2016204/y_data_2016204_5min_60min_60min.csv'
 

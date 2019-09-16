@@ -55,14 +55,14 @@ CV_RESULT_DIR = './Result/CV/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 10
 OPTIMIZED_EPOCH_CONV = 30
-OPTIMIZED_EPOCH_LSTM = 30
+OPTIMIZED_EPOCH_LSTM = 20
 OPTIMIZED_EPOCH_CONV_LSTM = 30
 PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
 #FLAG
-RESTORE_FLAG = False #weight 불러오기 여부 [default False]
-RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
+RESTORE_FLAG = True #weight 불러오기 여부 [default False]
+RESTORE_GENERATOR_FLAG = True #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
 LATENT_VECTOR_FLAG = False #generator가 12짜리 vector를 생산할 것인가 또는 scalar 예측값을 생산할 것인가
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
@@ -127,7 +127,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00008 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.0001 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
