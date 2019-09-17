@@ -563,7 +563,11 @@ def output_data(train_result, test_result, file_name, cr_idx):
     #train output
     if not os.path.exists(RESULT_DIR):
         os.makedirs(RESULT_DIR)
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    if FILEX_EXO.find("Zero") >= 0:
+        outputfile = open('./Result/' + 'OnlySpeed_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+    else:
+        outputfile = open('./Result/' + 'Exogenous_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+
     output = csv.writer(outputfile)
 
     for tr_idx in range(len(train_result)):
@@ -572,9 +576,12 @@ def output_data(train_result, test_result, file_name, cr_idx):
     outputfile.close()
 
     # test output
-    outputfile = open('./Result/' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
-    output = csv.writer(outputfile)
+    if FILEX_EXO.find("Zero") >= 0:
+        outputfile = open('./Result/' + 'OnlySpeed_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+    else:
+        outputfile = open('./Result/' + 'Exogenous_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
 
+    output = csv.writer(outputfile)
     for te_idx in range(len(test_result)):
         output.writerow([str(test_result[te_idx][0]),str(test_result[te_idx][1]),str(test_result[te_idx][2])])
 
