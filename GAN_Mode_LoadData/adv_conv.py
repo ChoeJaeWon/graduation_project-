@@ -191,7 +191,11 @@ for train_idx, test_idx in load_Data():
     else:
         saver = tf.train.Saver()
 
-    CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_" + str(cr_idx) + "/"
+    if FILEX_EXO.find("Zero") >= 0:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_" + str(cr_idx) + "/"
+    else:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_EXO_" + str(cr_idx) + "/"
+
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
     if RESTORE_FLAG:
