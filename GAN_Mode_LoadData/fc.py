@@ -96,7 +96,7 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
-
+_result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "FC"
 DIR = "./index/"
 if not os.path.exists(DIR):
     os.makedirs(DIR)
@@ -137,8 +137,18 @@ for train_idx, test_idx in load_Data():
 
     init()
     cost_MAE, cost_MSE, cost_MAPE, optimal = model(S, E, Y, BA, DR)
-    writer_train = tf.summary.FileWriter("./tensorboard/fc/train%d" % cr_idx, sess.graph)
-    writer_test = tf.summary.FileWriter("./tensorboard/fc/test%d" % cr_idx, sess.graph)
+
+    if FILEX_EXO.find("Zero") >= 0:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_OS_" + str(cr_idx) + "/"
+        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/fc_os/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/fc_os/test%d" % cr_idx, sess.graph)
+    else:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_EXO_" + str(cr_idx) + "/"
+        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/fc_exo/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/fc_exo/test%d" % cr_idx, sess.graph)
+
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
     cost_MSE_hist = tf.summary.scalar('cost_MSE', cost_MSE)
     cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
@@ -146,14 +156,6 @@ for train_idx, test_idx in load_Data():
 
     # Saver and Restore
     saver = tf.train.Saver()
-
-    if FILEX_EXO.find("Zero") >= 0:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_OS_" + str(cr_idx) + "/"
-        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
-    else:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "FC_EXO_" + str(cr_idx) + "/"
-        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
-
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
     if RESTORE_FLAG:
@@ -174,9 +176,9 @@ for train_idx, test_idx in load_Data():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'fc_'+str(FC_LAYER_NUM)+'layer_', cr_idx)
+    output_data(train_result, test_result, 'fc_'+str(FC_LAYER_NUM)+'layer_', cr_idx, _result_dir)
     cr_idx = cr_idx + 1
     if (cr_idx == CROSS_ITERATION_NUM):
         break
 
-output_result(final_result, 'fc' + "_", cr_idx)
+output_result(final_result, 'fc' + "_", cr_idx , _result_dir)

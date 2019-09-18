@@ -46,7 +46,7 @@ random.seed(777)
 #Setting
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/ExogenousZero/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
@@ -78,8 +78,8 @@ INTERVAL = 24 #adv conv lstm에서 overlap방지
 TRAIN_NUM = 200 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
-CROSS_NUM = 5 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_NUM = 20 #cross validation의 spilit 수
+CROSS_ITERATION_NUM = 20 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
@@ -558,14 +558,16 @@ def Week_CrossValidation():
 
 #train과 test에서 얻은 결과를 file로 만든다.
 #file_name에 실행하는 코드의 이름을 적는다 ex)adv_conv_lstm
-def output_data(train_result, test_result, file_name, cr_idx):
+def output_data(train_result, test_result, file_name, cr_idx, _result_dir):
     #train output
-    if not os.path.exists(RESULT_DIR):
-        os.makedirs(RESULT_DIR)
+    if not os.path.exists(_result_dir + "_OS/"):
+        os.makedirs(_result_dir+ "_OS/")
+    if not os.path.exists(_result_dir + "_EXO/"):
+        os.makedirs(_result_dir + "_EXO/")
     if FILEX_EXO.find("Zero") >= 0:
-        outputfile = open('./Result/' + 'OnlySpeed_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+        outputfile = open(_result_dir + "_OS/" + 'OnlySpeed_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
     else:
-        outputfile = open('./Result/' + 'Exogenous_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
+        outputfile = open(_result_dir + "_EXO/" + 'Exogenous_' + file_name + str(cr_idx) + '_tr' + '.csv', 'w', newline='')
 
     output = csv.writer(outputfile)
 
@@ -576,9 +578,9 @@ def output_data(train_result, test_result, file_name, cr_idx):
 
     # test output
     if FILEX_EXO.find("Zero") >= 0:
-        outputfile = open('./Result/' + 'OnlySpeed_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+        outputfile = open(_result_dir + "_OS/" + 'OnlySpeed_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
     else:
-        outputfile = open('./Result/' + 'Exogenous_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
+        outputfile = open(_result_dir + "_EXO/" + 'Exogenous_' + file_name + str(cr_idx) + '_te' + '.csv', 'w', newline='')
 
     output = csv.writer(outputfile)
     for te_idx in range(len(test_result)):
@@ -586,13 +588,17 @@ def output_data(train_result, test_result, file_name, cr_idx):
 
     outputfile.close()
 
-def output_result(final_result, file_name, cr_idx):
-    if not os.path.exists(RESULT_DIR):
-        os.makedirs(RESULT_DIR)
+def output_result(final_result, file_name, cr_idx, _result_dir):
+    ''' REDUNDENT
+    if not os.path.exists(_result_dir + "_OS/"):
+        os.makedirs(_result_dir + "_OS/")
+    if not os.path.exists(_result_dir + "_EXO/"):
+        os.makedirs(_result_dir + "_EXO/")
+    '''
     if FILEX_EXO.find("Zero") >= 0:
-        resultfile = open(RESULT_DIR + 'OnlySpeed_'+file_name + 'result' +'_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
+        resultfile = open(_result_dir + "_OS/" + 'OnlySpeed_'+file_name + 'result' +'_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
     else:
-        resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + 'result' + '_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
+        resultfile = open(_result_dir + "_EXO/" + 'Exogenous_' + file_name + 'result' + '_' + str(CROSS_ITERATION_NUM) + '.csv', 'w', newline='')
     output = csv.writer(resultfile)
 
     if cr_idx == CROSS_ITERATION_NUM:

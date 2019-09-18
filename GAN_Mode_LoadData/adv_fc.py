@@ -161,6 +161,7 @@ def train_discriminator():
 ###################################################-MAIN-###################################################
 S_data, _,  E_data, Y_data = input_data(0b101)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
+_result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "ADV_FC"
 cr_idx = 0
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
@@ -185,8 +186,15 @@ for train_idx, test_idx in load_Data():
     sess = tf.Session()
     #여기서는 모델만 외부 플래그, 그냥 train까지 외부 플래그 해도 됨
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, train_G_MSE, train_G_Gen= model_base(S, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
-    writer_train = tf.summary.FileWriter("./tensorboard/adv_fc/train%d" % cr_idx, sess.graph)
-    writer_test = tf.summary.FileWriter("./tensorboard/adv_fc/test%d" % cr_idx, sess.graph)
+    if FILEX_EXO.find("Zero") >= 0:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_os/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_os/test%d" % cr_idx, sess.graph)
+    else:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_exo/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_exo/test%d" % cr_idx, sess.graph)
+
     train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
     cost_MSE_hist = tf.summary.scalar('cost_MAE', cost_MSE)
@@ -201,12 +209,6 @@ for train_idx, test_idx in load_Data():
         saver = tf.train.Saver(variables_to_restore)
     else:
         saver = tf.train.Saver()
-
-    if FILEX_EXO.find("Zero") >= 0:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
-    else:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
-
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
     if RESTORE_FLAG:
@@ -230,11 +232,11 @@ for train_idx, test_idx in load_Data():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_fc'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) +"_"+ str(TRAIN_NUM)+ "_" , cr_idx)
+    output_data(train_result, test_result, 'adv_fc'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) +"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
 
     cr_idx = cr_idx + 1
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
 
-output_result(final_result, 'adv_fc' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx)
+output_result(final_result, 'adv_fc' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx, _result_dir)

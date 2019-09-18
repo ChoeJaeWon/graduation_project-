@@ -133,6 +133,7 @@ def train_discriminator():
 ###################################################-MAIN-###################################################
 S_data, C_data, E_data,Y_data= input_data(0b111)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
+_result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "ADV_CONV_LSTM"
 cr_idx = 0
 kf = KFold(n_splits=CROSS_NUM, shuffle=True)
 for train_idx, test_idx in load_Data():
@@ -155,8 +156,15 @@ for train_idx, test_idx in load_Data():
     init()
     sess = tf.Session()
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
-    writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm/train%d" % cr_idx, sess.graph)
-    writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm/test%d" % cr_idx, sess.graph)
+    if FILEX_EXO.find("Zero") >= 0:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/test%d" % cr_idx, sess.graph)
+    else:
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_" + str(cr_idx) + "/"
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/test%d" % cr_idx, sess.graph)
+
     train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
     cost_MSE_hist = tf.summary.scalar('cost_MSE', cost_MSE)
@@ -172,12 +180,6 @@ for train_idx, test_idx in load_Data():
         saver = tf.train.Saver(variables_to_restore)
     else:
         saver = tf.train.Saver()
-
-    if FILEX_EXO.find("Zero") >= 0:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
-    else:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_" + str(cr_idx) + "/"
-
     checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
     if RESTORE_FLAG:
@@ -198,11 +200,11 @@ for train_idx, test_idx in load_Data():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_conv_lstm'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_" , cr_idx)
+    output_data(train_result, test_result, 'adv_conv_lstm'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
 
     cr_idx=cr_idx+1
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
 
-output_result(final_result, 'adv_conv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx)
+output_result(final_result, 'adv_conv_lstm' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx, _result_dir)
