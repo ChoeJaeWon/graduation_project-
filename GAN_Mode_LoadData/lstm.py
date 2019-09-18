@@ -57,7 +57,10 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                 if not os.path.exists(CURRENT_POINT_DIR):
                     os.makedirs(CURRENT_POINT_DIR)
                 saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-
+                if tr_idx == OPTIMIZED_EPOCH_LSTM:
+                    if not os.path.exists(ADV_POINT_DIR):
+                        os.makedirs(ADV_POINT_DIR)
+                    saver.save(sess, ADV_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
             global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
         #cross validation의 train_idx를 shuffle해준다.
@@ -118,8 +121,10 @@ for train_idx, test_idx in load_Data():
     saver = tf.train.Saver()
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "LSTM_OS_" + str(cr_idx) + "/"
+        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_LSTM_OS_" + str(cr_idx) + "/"
     else:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "LSTM_EXO_" + str(cr_idx) + "/"
+        ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_LSTM_EXO_" + str(cr_idx) + "/"
 
     if RESTORE_FLAG:
         checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)

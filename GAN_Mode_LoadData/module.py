@@ -52,10 +52,10 @@ FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파�
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 RESULT_DIR = './Result/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
-OPTIMIZED_EPOCH_FC = 10
-OPTIMIZED_EPOCH_CONV = 30
-OPTIMIZED_EPOCH_LSTM = 20
-OPTIMIZED_EPOCH_CONV_LSTM = 30
+OPTIMIZED_EPOCH_FC = 10 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_CONV = 30 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_LSTM = 20 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_CONV_LSTM = 30 #SAVE_INTERVEL 의 배수여야 합니다.
 PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
