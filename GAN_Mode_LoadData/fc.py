@@ -174,7 +174,7 @@ for train_idx, test_idx in load_Data():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'fc_exo_5layer', cr_idx)
+    output_data(train_result, test_result, 'fc_'+str(FC_LAYER_NUM)+'layer_', cr_idx)
     cr_idx = cr_idx + 1
     if (cr_idx == CROSS_ITERATION_NUM):
         break

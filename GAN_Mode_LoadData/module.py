@@ -46,7 +46,7 @@ random.seed(777)
 #Setting
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousZero/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
