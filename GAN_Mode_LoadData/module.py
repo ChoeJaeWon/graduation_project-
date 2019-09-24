@@ -45,6 +45,16 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 random.seed(777)
 
 #Setting
+FC_ALLTEST = []
+CONV_ALLTEST = []
+LSTM_ALLTEST = []
+CONVLSTM_ALLTEST = []
+ADV_FC_ALLTEST = []
+ADV_CONV_ALLTEST = []
+ADV_LSTM_ALLTEST = []
+ADV_CONVLSTM_ALLTEST = []
+
+
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
 FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
@@ -114,7 +124,7 @@ LAST_LAYER_SIZE = 8
 
 #Hyper Parameter(LSTM)
 LSTM_TRAIN_NUM = 10 #lstm의 training 수
-HIDDEN_NUM = [1024, 512] #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = [512, 512] #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 GEN_NUM = 12 #generator의 개수
@@ -663,6 +673,32 @@ def load_Data():
 
     return zip(np.array(train_idx), np.array(test_idx))
 
+#batch slice부분 모델마다 다르게 해줘야함.(각 모델의test참고)
+def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
 
+    file_name = 'FC'
+
+    for idx in range(len(data_idx)):
+        S_test = batch_slice(S_data, data_idx, idx, file_name, 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, file_name, 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, file_name, 1, 1)
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+
+        result_alltest.append([str(mse), str(mae), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR):
+        os.makedirs(RESULT_DIR)
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR + 'OnlySpeed_'+file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 
