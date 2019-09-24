@@ -35,6 +35,7 @@ Q. conv 채널수 늘리기 정확도가 fc랑 비슷하면 안된다.
 import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
+from sklearn.svm import SVR
 import csv
 import os
 import random
@@ -55,7 +56,7 @@ LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
 OPTIMIZED_EPOCH_FC = 35 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_CONV = 30 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_LSTM = 20 #SAVE_INTERVEL 의 배수여야 합니다.
-OPTIMIZED_EPOCH_CONV_LSTM = 15 #SAVE_INTERVEL 의 배수여야 합니다.15
+OPTIMIZED_EPOCH_CONV_LSTM = 10 #SAVE_INTERVEL 의 배수여야 합니다.15
 PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
@@ -82,7 +83,7 @@ CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
-LEARNING_RATE = 0.0001 #learning rate(모든 model, gan은 *2)
+LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 SAVE_INTERVAL = 5
@@ -113,7 +114,7 @@ LAST_LAYER_SIZE = 8
 
 #Hyper Parameter(LSTM)
 LSTM_TRAIN_NUM = 10 #lstm의 training 수
-HIDDEN_NUM = [512, 256] #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = [1024, 512] #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 GEN_NUM = 12 #generator의 개수
@@ -126,7 +127,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00008 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00007 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
