@@ -51,6 +51,10 @@ def TrainAndTest(S_data, E_data, Y_data, train_idx, test_idx, train_result, test
     mse_tr = MSE(Y_train.ravel(), Y_pred)
     mape_tr = MAPE(Y_train.ravel(), Y_pred)
 
+    train_result[0] += mae_tr
+    train_result[1] += mse_tr
+    train_result[2] += mape_tr
+
     print("train %lf %lf %lf" % (mae_tr, mse_tr, mape_tr))
 
     Y_pred = fit_tr.predict(X_test)
@@ -59,6 +63,10 @@ def TrainAndTest(S_data, E_data, Y_data, train_idx, test_idx, train_result, test
     mse_te = MSE(Y_test.ravel(), Y_pred)
     mape_te = MAPE(Y_test.ravel(), Y_pred)
 
+    test_result[0] += mae_te
+    test_result[1] += mse_te
+    test_result[2] += mape_te
+
     print("test %lf %lf %lf" % (mae_te, mse_te, mape_te))
 
 
@@ -66,11 +74,15 @@ def TrainAndTest(S_data, E_data, Y_data, train_idx, test_idx, train_result, test
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
-train_result = []
-test_result = []
+test_result = [0, 0, 0]
+train_result = [0, 0, 0]
 
 cr_idx =0
 for train_idx, test_idx in load_Data():
+    if cr_idx <5:
+        cr_idx+=1
+        continue
+
     print("CV %d" % cr_idx)
 
 
@@ -80,3 +92,7 @@ for train_idx, test_idx in load_Data():
     cr_idx = cr_idx + 1
     if (cr_idx == CROSS_ITERATION_NUM):
         break
+
+print("\nCROSS_ITERATION_NUM: %d" % CROSS_ITERATION_NUM)
+print("average_train %lf % lf %lf" % (train_result[0]/CROSS_ITERATION_NUM, train_result[1]/CROSS_ITERATION_NUM, train_result[2]/CROSS_ITERATION_NUM))
+print("average_test %lf % lf %lf" % (test_result[0]/CROSS_ITERATION_NUM, test_result[1]/CROSS_ITERATION_NUM, test_result[2]/CROSS_ITERATION_NUM))
