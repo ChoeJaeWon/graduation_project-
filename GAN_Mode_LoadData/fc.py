@@ -48,30 +48,28 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
         #All test 해줌
         if ALL_TEST_SWITCH:
-            print("train epoch: %d" % tr_idx)
             if (OS_OR_EXO and FC_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and FC_EXO_ALLTEST[cr_idx] == tr_idx):
                 ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
                 ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
                 return 0
 
-        else:
-            # 설정 interval당 train과 test 값을 출력해준다.
-            if tr_idx % TRAIN_PRINT_INTERVAL == 0:
-                train_result.append([epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM])
-                print("Train Cost %d: %lf %lf" % (tr_idx, epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM))
-            if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-                sess.run(last_epoch.assign(tr_idx + 1))
-                if tr_idx % SAVE_INTERVAL == 0:
-                    print("Saving network...")
-                    if not os.path.exists(CURRENT_POINT_DIR):
-                        os.makedirs(CURRENT_POINT_DIR)
-                    saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-                    if tr_idx == OPTIMIZED_EPOCH_FC:
-                        print("Saving network for ADV...")
-                        if not os.path.exists(ADV_POINT_DIR):
-                            os.makedirs(ADV_POINT_DIR)
-                        saver.save(sess, ADV_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-                global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
+        # 설정 interval당 train과 test 값을 출력해준다.
+        if tr_idx % TRAIN_PRINT_INTERVAL == 0:
+            train_result.append([epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM])
+            print("Train Cost %d: %lf %lf" % (tr_idx, epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM))
+        if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
+            sess.run(last_epoch.assign(tr_idx + 1))
+            if tr_idx % SAVE_INTERVAL == 0:
+                print("Saving network...")
+                if not os.path.exists(CURRENT_POINT_DIR):
+                    os.makedirs(CURRENT_POINT_DIR)
+                saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+                if tr_idx == OPTIMIZED_EPOCH_FC:
+                    print("Saving network for ADV...")
+                    if not os.path.exists(ADV_POINT_DIR):
+                        os.makedirs(ADV_POINT_DIR)
+                    saver.save(sess, ADV_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+            global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
