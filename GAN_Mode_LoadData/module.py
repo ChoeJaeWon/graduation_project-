@@ -83,7 +83,7 @@ PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
 #FLAG
-USE_LOAD = True
+USE_LOAD = False
 RESTORE_FLAG = USE_LOAD #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = USE_LOAD #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
@@ -98,11 +98,11 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 200 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 20 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
