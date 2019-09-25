@@ -47,9 +47,10 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             global_step_tr += 1
 
         #All test 해줌
-        if ALL_TEST_SWITCH and FC_ALLTEST[cr_idx] == tr_idx:
-            ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
-            ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
+        if ALL_TEST_SWITCH:
+            if (OS_OR_EXO and FC_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and FC_EXO_ALLTEST[cr_idx] == tr_idx):
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
 
 
 
@@ -130,6 +131,10 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
 ###################################################-MAIN-###################################################
 S_data, _, E_data, Y_data = input_data(0b101) #speed, exogenous 사용
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
+
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
 
 DIR = "./index/"
 if not os.path.exists(DIR):
