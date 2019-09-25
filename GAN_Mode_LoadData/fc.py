@@ -135,7 +135,9 @@ _result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "FC"
 DIR = "./index/"
 if not os.path.exists(DIR):
     os.makedirs(DIR)
-
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
 cr_idx =0
 for train_idx, test_idx in load_Data():
 

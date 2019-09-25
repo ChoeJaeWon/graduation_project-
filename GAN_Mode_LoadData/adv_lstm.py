@@ -160,6 +160,9 @@ S_data, _, E_data,Y_data= input_data(0b101)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 _result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "ADV_LSTM"
 cr_idx = 0
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
     train_result = []
