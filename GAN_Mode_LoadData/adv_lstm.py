@@ -86,6 +86,12 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
             global_step_te = test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
+        # All test 해줌
+        if ALL_TEST_SWITCH:
+            if (OS_OR_EXO and ADV_LSTM_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and ADV_LSTM_EXO_ALLTEST[cr_idx] == tr_idx):
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
+                return 0
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
