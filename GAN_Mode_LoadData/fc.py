@@ -46,6 +46,13 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
 
+        #All test 해줌
+        if ALL_TEST_SWITCH and FC_ALLTEST[cr_idx] == tr_idx:
+            ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
+            ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
+
+
+
         # 설정 interval당 train과 test 값을 출력해준다.
         if tr_idx % TRAIN_PRINT_INTERVAL == 0:
             train_result.append([epoch_mse_cost / BATCH_NUM, epoch_mape_cost / BATCH_NUM])
@@ -90,6 +97,33 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
 
     return global_step_te
 
+#batch slice부분 모델마다 다르게 해줘야함.(각 모델의test참고)
+def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
+
+    file_name = 'FC'
+
+    for idx in range(len(data_idx)):
+        S_test = batch_slice(S_data, data_idx, idx, file_name, 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, file_name, 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, file_name, 1, 1)
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+
+        result_alltest.append([str(mse), str(mae), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR):
+        os.makedirs(RESULT_DIR)
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 
 
@@ -171,6 +205,9 @@ for train_idx, test_idx in load_Data():
     print('Start learning from:', start_from)
 
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
+
+
+
 
     tf.reset_default_graph()
 

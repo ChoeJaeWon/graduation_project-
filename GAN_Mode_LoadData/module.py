@@ -45,6 +45,7 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 random.seed(777)
 
 #Setting
+ALL_TEST_SWITCH = True
 FC_ALLTEST = []
 CONV_ALLTEST = []
 LSTM_ALLTEST = []
@@ -691,7 +692,7 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
     if not os.path.exists(RESULT_DIR):
         os.makedirs(RESULT_DIR)
     if FILEX_EXO.find("Zero") >= 0:
-        resultfile = open(RESULT_DIR + 'OnlySpeed_'+file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+        resultfile = open(RESULT_DIR + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
     else:
         resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
     output = csv.writer(resultfile)
