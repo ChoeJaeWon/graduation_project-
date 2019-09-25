@@ -111,7 +111,7 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
         Y_test = batch_slice(Y_data, data_idx, idx, file_name, 1, 1)
         mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
 
-        result_alltest.append([str(mse), str(mae), str(mape)])
+        result_alltest.append([str(mae), str(mse), str(mape)])
 
 
     if not os.path.exists(RESULT_DIR):
