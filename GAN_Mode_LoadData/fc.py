@@ -114,12 +114,12 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
         result_alltest.append([str(mae), str(mse), str(mape)])
 
 
-    if not os.path.exists(RESULT_DIR):
-        os.makedirs(RESULT_DIR)
+    if not os.path.exists(RESULT_DIR+'alltest/'):
+        os.makedirs(RESULT_DIR+'alltest/')
     if FILEX_EXO.find("Zero") >= 0:
-        resultfile = open(RESULT_DIR + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
     else:
-        resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
     output = csv.writer(resultfile)
 
     for idx in range(len(data_idx)):
