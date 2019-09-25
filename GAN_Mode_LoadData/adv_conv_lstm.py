@@ -135,8 +135,13 @@ def train_discriminator():
 ###################################################-MAIN-###################################################
 S_data, C_data, E_data,Y_data= input_data(0b111)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
+
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
+
 cr_idx = 0
-kf = KFold(n_splits=CROSS_NUM, shuffle=True)
+
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
 

@@ -124,6 +124,10 @@ def train_discriminator():
 S_data, _, E_data,Y_data= input_data(0b101)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
+
 cr_idx = 0
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
