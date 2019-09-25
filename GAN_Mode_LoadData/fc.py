@@ -213,9 +213,6 @@ for train_idx, test_idx in load_Data():
 
     train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from)
 
-
-
-
     tf.reset_default_graph()
 
     output_data(train_result, test_result, 'fc_'+str(FC_LAYER_NUM)+'layer_', cr_idx)

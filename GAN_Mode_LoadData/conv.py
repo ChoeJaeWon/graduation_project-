@@ -93,6 +93,32 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
     return global_step_te
 
+def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
+
+    file_name = 'CONV'
+
+    for idx in range(len(data_idx)):
+        C_test = batch_slice(C_data, data_idx, idx, 'CONV', 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, 'FC', 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, 'FC', 1, 1)
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+
+        result_alltest.append([str(mae), str(mse), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR+'alltest/'):
+        os.makedirs(RESULT_DIR+'alltest/')
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 
 ###################################################-MAIN-###################################################
