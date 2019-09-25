@@ -64,6 +64,12 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                     saver.save(sess, ADV_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
             global_step_te=test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
+        # All test 해줌
+        if ALL_TEST_SWITCH:
+            if (OS_OR_EXO and LSTM_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and LSTM_EXO_ALLTEST[cr_idx] == tr_idx):
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
+                ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
+                return 0
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
@@ -89,7 +95,33 @@ def test(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae, mse, mape))
     return global_step_te
 
+def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
 
+    file_name = 'LSTM'
+
+    for idx in range(len(data_idx)):
+        S_test = batch_slice(S_data, data_idx, idx, 'LSTM', 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, 'LSTM', 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, 'LSTMY', 1, 1)
+
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test})
+
+        result_alltest.append([str(mae), str(mse), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR+'alltest/'):
+        os.makedirs(RESULT_DIR+'alltest/')
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 
 ###################################################-MAIN-###################################################

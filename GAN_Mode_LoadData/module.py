@@ -35,6 +35,7 @@ Q. conv 채널수 늘리기 정확도가 fc랑 비슷하면 안된다.
 import tensorflow as tf
 import numpy as np
 from sklearn.model_selection import KFold
+from sklearn.svm import SVR
 import csv
 import os
 import random
@@ -44,6 +45,8 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 random.seed(777)
 
 #Setting
+
+
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
 FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
@@ -52,15 +55,38 @@ FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파�
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 RESULT_DIR = './Result/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
-OPTIMIZED_EPOCH_FC = 10 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_FC = 35 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_CONV = 30 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_LSTM = 20 #SAVE_INTERVEL 의 배수여야 합니다.
-OPTIMIZED_EPOCH_CONV_LSTM = 30 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_CONV_LSTM = 10 #SAVE_INTERVEL 의 배수여야 합니다.15
 PHASE1_EPOCH = 10
 PHASE2_EPOCH = 20
 
+#각 CV당 최저점의 index
+#naive excel에서 검색하여 -1 해줌(excel은 index 1부터 시작함)
+#adv excel에서 검색한 값에 optimized epoch 더해줌(1안뺌)
+ALL_TEST_SWITCH = True
+FC_OS_ALLTEST = [133, 89, 184, 106, 163]
+CONV_OS_ALLTEST = [60, 160, 45, 103, 188]
+LSTM_OS_ALLTEST = [] #4CV만 돌았음
+CONVLSTM_OS_ALLTEST = [51, 7, 17, 99, 65]
+ADV_FC_OS_ALLTEST = [79, 35, 71, 55, 85]+[OPTIMIZED_EPOCH_FC for _ in range(5)]
+ADV_CONV_OS_ALLTEST = [41, 55, 45, 32, 42]+[OPTIMIZED_EPOCH_CONV for _ in range(5)]
+ADV_LSTM_OS_ALLTEST = [73, 57, 42, 52]#4CV까지 돌았
+ADV_CONVLSTM_OS_ALLTEST = [41, 37, 66, 55, 55]+[OPTIMIZED_EPOCH_CONV_LSTM for _ in range(5)]
+
+FC_EXO_ALLTEST = [119, 195, 88, 105, 76]
+CONV_EXO_ALLTEST = [187, 64, 188, 27, 181]
+LSTM_EXO_ALLTEST = [40, 91, 72, 9, 33]
+CONVLSTM_EXO_ALLTEST = [47,	53,	21,	20,	52]
+ADV_FC_EXO_ALLTEST = [32, 57, 36, 32, 32]+[OPTIMIZED_EPOCH_FC for _ in range(5)]
+ADV_CONV_EXO_ALLTEST = [33,	39,	35,	32,	32]+[OPTIMIZED_EPOCH_CONV for _ in range(5)]
+ADV_LSTM_EXO_ALLTEST = [41,	83,	41,	41,	41]+[OPTIMIZED_EPOCH_LSTM for _ in range(5)]
+ADV_CONVLSTM_EXO_ALLTEST = [44,	61,	35,	32,	75]+[OPTIMIZED_EPOCH_CONV_LSTM for _ in range(5)]
+
+
 #FLAG
-USE_LOAD = False
+USE_LOAD = True
 RESTORE_FLAG = USE_LOAD #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = USE_LOAD #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
@@ -113,7 +139,7 @@ LAST_LAYER_SIZE = 8
 
 #Hyper Parameter(LSTM)
 LSTM_TRAIN_NUM = 10 #lstm의 training 수
-HIDDEN_NUM = 512 #lstm의 hidden unit 수 [default 32]
+HIDDEN_NUM = [512, 512] #lstm의 hidden unit 수 [default 32]
 FORGET_BIAS = 1.0 #lstm의 forget bias [default 1.0]
 CELL_SIZE = 12 #lstm의 cell 개수 [default 12]
 GEN_NUM = 12 #generator의 개수
@@ -126,7 +152,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.00008 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00007 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
@@ -176,7 +202,7 @@ def init():
     convfc_weights.append(init_weights([LAST_LAYER_SIZE*CHANNEL_NUM[CONV_LAYER_NUM],TIME_STAMP]))
 
     # lstm weight 초기화
-    lstm_weights.append(init_weights([HIDDEN_NUM, 1]))
+    lstm_weights.append(init_weights([HIDDEN_NUM[-1], 1]))
     lstm_biases.append(init_weights([1]))
 
     # discriminator conv weight 초기화
@@ -313,10 +339,13 @@ def LSTM_model(S, E, is_reuse=False):
 def multi_LSTM_model(S, E, isReuse = False):
     with tf.variable_scope('generator_lstm', reuse=isReuse):
         x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
-        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
-        lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
-        multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
+        cells = [tf.nn.rnn_cell.BasicLSTMCell(num_units=n) for n in HIDDEN_NUM]
+        multi_cell = tf.nn.rnn_cell.MultiRNNCell(cells)
+
+        #lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        #lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=256, forget_bias=FORGET_BIAS)
+        #multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
 
         outputs, _ = tf.nn.static_rnn(cell=multi_cell, inputs=x, dtype=tf.float32)
         # outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
@@ -343,10 +372,13 @@ def LSTM_model_12(S, E, is_reuse=False):
 def multi_LSTM_model_12(S, E, isReuse = False):
     with tf.variable_scope('generator_lstm', reuse=isReuse):
         x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
-        lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
-        lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
-        multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
+        cells = [tf.nn.rnn_cell.BasicLSTMCell(num_units=n) for n in HIDDEN_NUM]
+        multi_cell = tf.nn.rnn_cell.MultiRNNCell(cells)
+
+        #lstm_cell1 = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        #lstm_cell2  = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        #multi_cell = tf.nn.rnn_cell.MultiRNNCell([lstm_cell1, lstm_cell2])
 
         outputs, _ = tf.nn.static_rnn(cell=multi_cell, inputs=x, dtype=tf.float32)
         # outputs, _ = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
@@ -662,6 +694,32 @@ def load_Data():
 
     return zip(np.array(train_idx), np.array(test_idx))
 
+#batch slice부분 모델마다 다르게 해줘야함.(각 모델의test참고)
+def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
 
+    file_name = 'FC'
+
+    for idx in range(len(data_idx)):
+        S_test = batch_slice(S_data, data_idx, idx, file_name, 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, file_name, 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, file_name, 1, 1)
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={S:S_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+
+        result_alltest.append([str(mse), str(mae), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR):
+        os.makedirs(RESULT_DIR)
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 

@@ -66,7 +66,11 @@ def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,  cost_MAE_hist,
                     saver.save(sess, ADV_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
             global_step_te=test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
-
+        if ALL_TEST_SWITCH:
+            if (OS_OR_EXO and CONV_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and CONV_EXO_ALLTEST[cr_idx] == tr_idx):
+                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
+                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
+                return 0
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
@@ -93,6 +97,32 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape ))
     return global_step_te
 
+def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+    result_alltest = []
+
+    file_name = 'CONV'
+
+    for idx in range(len(data_idx)):
+        C_test = batch_slice(C_data, data_idx, idx, 'CONV', 1, 1)
+        E_test = batch_slice(E_data, data_idx, idx, 'FC', 1, 1)
+        Y_test = batch_slice(Y_data, data_idx, idx, 'FC', 1, 1)
+        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB})
+
+        result_alltest.append([str(mae), str(mse), str(mape)])
+
+
+    if not os.path.exists(RESULT_DIR+'alltest/'):
+        os.makedirs(RESULT_DIR+'alltest/')
+    if FILEX_EXO.find("Zero") >= 0:
+        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+    else:
+        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+    output = csv.writer(resultfile)
+
+    for idx in range(len(data_idx)):
+        output.writerow(result_alltest[idx])
+
+    resultfile.close()
 
 
 ###################################################-MAIN-###################################################
@@ -100,6 +130,11 @@ _, C_data, E_data, Y_data = input_data(0b011)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
 _result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "CONV"
 cr_idx = 0
+
+OS_OR_EXO = True
+if FILEX_EXO.find("Zero") < 0:
+    OS_OR_EXO = False
+
 for train_idx, test_idx  in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
 
