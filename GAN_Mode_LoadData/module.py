@@ -45,14 +45,16 @@ tf.set_random_seed(777) #tf.random의 seed 설정
 random.seed(777)
 
 #Setting
+#각 CV당 최저점의 index
+#excel에서 검색하여 -1 해줌(excel은 index 1부터 시작함)
 ALL_TEST_SWITCH = True
-FC_OS_ALLTEST = [134, 90, 185, 107, 164]
-CONV_OS_ALLTEST = [61, 161, 46, 104, 189]
+FC_OS_ALLTEST = [133, 89, 184, 106, 163]
+CONV_OS_ALLTEST = [60, 160, 45, 103, 188]
 LSTM_OS_ALLTEST = [] #4CV만 돌았음
-CONVLSTM_OS_ALLTEST = [52, 8, 18, 100, 66]
-ADV_FC_OS_ALLTEST = [79, 35, 71, 55, 85]
-ADV_CONV_OS_ALLTEST = [41, 55, 45, 32, 42]
-ADV_LSTM_OS_ALLTEST = [73, 57, 42, 52]#4CV까지 돌았
+CONVLSTM_OS_ALLTEST = [51, 7, 17, 99, 65]
+ADV_FC_OS_ALLTEST = [78, 34, 70, 54, 84]
+ADV_CONV_OS_ALLTEST = [40, 54, 44, 31, 41]
+ADV_LSTM_OS_ALLTEST = [72, 56, 41, 51]#4CV까지 돌았
 ADV_CONVLSTM_OS_ALLTEST = []#4CV만 돌았음
 
 FC_EXO_ALLTEST = [43, 195, 88, 105, 76]
