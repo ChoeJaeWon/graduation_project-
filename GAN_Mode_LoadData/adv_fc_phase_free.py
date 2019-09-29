@@ -85,21 +85,20 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
             E_train = batch_slice(E_data, train_idx, ba_idx, 'ADV_FC')
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
-            if tr_idx > OPTIMIZED_EPOCH_FC + PHASE1_EPOCH:  # generator 먼저 선학습 후 discriminator 단독 학습
-                _ = sess.run([train_D], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
-                # print(sess.run(vars_G[2]))
-                # print(sess.run(variables1[0]))
-            if (tr_idx <= OPTIMIZED_EPOCH_FC + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_FC + PHASE1_EPOCH + PHASE2_EPOCH):
-                cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, train_G, loss_G],
-                                                                    feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True,
-                                                                               DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True,
-                                                                               DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
-                # print(sess.run(vars_G[2]))
-                # print(sess.run(variables1[0]))
-                epoch_loss += loss
-                epoch_mse_cost += cost_MSE_val
-                epoch_mape_cost += cost_MAPE_val
-                writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+
+            _ = sess.run([train_D], feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True, DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+            # print(sess.run(vars_G[2]))
+            # print(sess.run(variables1[0]))
+            cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _, loss = sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, train_G, loss_G],
+                                                                feed_dict={S: S_train, E: E_train, Y: Y_train, BA: True,
+                                                                           DR: FC_TR_KEEP_PROB, DISCRIMINATOR_BA: True,
+                                                                           DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+            # print(sess.run(vars_G[2]))
+            # print(sess.run(variables1[0]))
+            epoch_loss += loss
+            epoch_mse_cost += cost_MSE_val
+            epoch_mape_cost += cost_MAPE_val
+            writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
 
         # 설정 interval당 train과 test 값을 출력해준다.
@@ -172,9 +171,9 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
     if not os.path.exists(RESULT_DIR+'alltest/'):
         os.makedirs(RESULT_DIR+'alltest/')
     if FILEX_EXO.find("Zero") >= 0:
-        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
+        resultfile = open(RESULT_DIR+'alltest/' + 'OnlySpeed_'+ file_name + '_phase_free'+ '_alltest_'+ trainORtest +'_' + str(cr_idx) + '.csv', 'w', newline='')
     else:
-        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
+        resultfile = open(RESULT_DIR+'alltest/' + 'Exogenous_' + file_name + '_phase_free'+ '_alltest_' + trainORtest + '_' + str(cr_idx) + '.csv', 'w', newline='')
     output = csv.writer(resultfile)
 
     for idx in range(len(data_idx)):
@@ -194,7 +193,7 @@ def train_discriminator():
 ###################################################-MAIN-###################################################
 S_data, _,  E_data, Y_data = input_data(0b101)
 final_result = [[] for i in range(CROSS_ITERATION_NUM)]
-_result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "ADV_FC"
+_result_dir = RESULT_DIR + "CV" + str(CROSS_ITERATION_NUM) + "/" + "ADV_FC_PHASE_FREE"
 cr_idx = 0
 OS_OR_EXO = True
 if FILEX_EXO.find("Zero") < 0:
@@ -224,12 +223,12 @@ for train_idx, test_idx in load_Data():
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, train_G_MSE, train_G_Gen= model_base(S, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
-        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_os/train%d" % cr_idx, sess.graph)
-        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_os/test%d" % cr_idx, sess.graph)
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_os_phase_free/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_os_phase_free/test%d" % cr_idx, sess.graph)
     else:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
-        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_exo/train%d" % cr_idx, sess.graph)
-        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_exo/test%d" % cr_idx, sess.graph)
+        writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_exo_phase_free/train%d" % cr_idx, sess.graph)
+        writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_exo_phase_free/test%d" % cr_idx, sess.graph)
 
     train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
     cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
@@ -268,11 +267,11 @@ for train_idx, test_idx in load_Data():
 
     tf.reset_default_graph()
 
-    output_data(train_result, test_result, 'adv_fc'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) +"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
+    output_data(train_result, test_result, 'adv_fc_phase_free'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH) +"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
 
     cr_idx = cr_idx + 1
 
     if (cr_idx == CROSS_ITERATION_NUM):
         break
 
-output_result(final_result, 'adv_fc' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx, _result_dir)
+output_result(final_result, 'adv_fc_phase_free' + "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_", cr_idx, _result_dir)
