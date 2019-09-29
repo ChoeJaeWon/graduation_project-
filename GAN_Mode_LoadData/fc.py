@@ -73,7 +73,9 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
                 return 0
 
         #cross validation의 train_idx를 shuffle해준다.
+        print("%d" % train_idx[0])
         np.random.shuffle(train_idx)
+
 
 
 #testing 해준다.
@@ -140,7 +142,6 @@ if FILEX_EXO.find("Zero") < 0:
     OS_OR_EXO = False
 cr_idx =0
 for train_idx, test_idx in load_Data():
-
 
     '''
     #Index To File
