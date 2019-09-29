@@ -222,11 +222,11 @@ for train_idx, test_idx in load_Data():
     #여기서는 모델만 외부 플래그, 그냥 train까지 외부 플래그 해도 됨
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G, train_G_MSE, train_G_Gen= model_base(S, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_" + str(cr_idx) + "/"
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_OS_PHASE_FREE" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_os_phase_free/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_os_phase_free/test%d" % cr_idx, sess.graph)
     else:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_" + str(cr_idx) + "/"
+        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_FC_EXO_PHASE_FREE" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_fc_exo_phase_free/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_fc_exo_phase_free/test%d" % cr_idx, sess.graph)
 

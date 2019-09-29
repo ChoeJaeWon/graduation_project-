@@ -88,7 +88,7 @@ ADV_CONVLSTM_EXO_ALLTEST = [44+OPTIMIZED_EPOCH_CONV_LSTM, 61+OPTIMIZED_EPOCH_CON
 USE_LOAD = False
 RESTORE_FLAG = USE_LOAD #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = USE_LOAD #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
-MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
+MASTER_SAVE_FLAG = True #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
 DAY = [-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
