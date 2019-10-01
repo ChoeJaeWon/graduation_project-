@@ -204,7 +204,7 @@ for train_idx, test_idx in load_Data():
     if RESTORE_GENERATOR_FLAG:
         last_epoch = tf.Variable(OPTIMIZED_EPOCH_CONV + 1, name=LAST_EPOCH_NAME)  # 받아올 방법이 없네..
     else:
-        last_epoch = tf.Variable(0, name=LAST_EPOCH_NAME)
+        last_epoch = tf.Variable(60, name=LAST_EPOCH_NAME)
     init()
     sess = tf.Session()
     # 여기서는 모델만 외부 플래그, 그냥 train까지 외부 플래그 해도 됨
