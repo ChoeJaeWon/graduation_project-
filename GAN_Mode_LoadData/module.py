@@ -49,7 +49,7 @@ random.seed(777)
 
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/ExogenousTime/ExogenousA_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
@@ -85,10 +85,10 @@ ADV_LSTM_EXO_ALLTEST = [41+OPTIMIZED_EPOCH_LSTM, 83+OPTIMIZED_EPOCH_LSTM, 41+OPT
 ADV_CONVLSTM_EXO_ALLTEST = [44+OPTIMIZED_EPOCH_CONV_LSTM, 61+OPTIMIZED_EPOCH_CONV_LSTM,	35+OPTIMIZED_EPOCH_CONV_LSTM, 32+OPTIMIZED_EPOCH_CONV_LSTM, 75+OPTIMIZED_EPOCH_CONV_LSTM]
 
 #FLAG
-USE_LOAD = True
+USE_LOAD = False
 RESTORE_FLAG = USE_LOAD #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = USE_LOAD #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
-MASTER_SAVE_FLAG = True #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
+MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
 DAY = [-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -100,14 +100,14 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 100 #traing 회수 [default 1000]
+TRAIN_NUM = 31 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
 CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
-LEARNING_RATE = 0.0001 #learning rate(모든 model, gan은 *2)
+LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
 SAVE_INTERVAL = 1
