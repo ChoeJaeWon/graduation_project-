@@ -215,7 +215,7 @@ for train_idx, test_idx in load_Data():
     if RESTORE_GENERATOR_FLAG:
         last_epoch = tf.Variable(OPTIMIZED_EPOCH_FC+1, name=LAST_EPOCH_NAME) #받아올 방법이 없네..
     else:
-        last_epoch = tf.Variable(65, name=LAST_EPOCH_NAME)
+        last_epoch = tf.Variable(66, name=LAST_EPOCH_NAME)
 
     init()
     sess = tf.Session()
