@@ -58,13 +58,15 @@ def model_base(C, E, Y,BA,DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     with tf.control_dependencies(G_MSE_update_ops):
         train_G_MSE = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G_MSE, var_list=[vars_G, fc_weights])
     '''
-    return train_MSE,cost_MAE, cost_MSE, cost_MAPE, train_D, train_G , loss_G#, train_G_MSE
+    layer = tf.transpose(layer, perm=[1, 0])
+    return train_MSE,cost_MAE, cost_MSE, cost_MAPE,layer[TIME_STAMP-1], train_D, train_G , loss_G#, train_G_MSE
 
 
 #training 해준다.
-def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
+    min_mape = 100.0
     for _ in range(start_from):
         np.random.shuffle(train_idx)
     global_step_tr = 0
@@ -111,11 +113,10 @@ def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, 
 
             global_step_te = test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
         # All test 해줌
-        if ALL_TEST_SWITCH:
-            if (OS_OR_EXO and ADV_CONV_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and ADV_CONV_EXO_ALLTEST[cr_idx] == tr_idx):
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
-                return 0
+        if ALL_TEST_SWITCH and test_result[tr_idx - OPTIMIZED_EPOCH_CONV - 1][2] < min_mape:
+            print("alltest")
+            min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV - 1][2]
+            ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
@@ -143,7 +144,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     return global_step_te
 
 
-def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, data_idx, sess, cr_idx, trainORtest):
     result_alltest = []
 
     file_name = 'ADV_CONV'
@@ -152,9 +153,9 @@ def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
         C_test = batch_slice(C_data, data_idx, idx, 'CONV', 12, 1)
         E_test = batch_slice(E_data, data_idx, idx, 'ADV_FC', 1, 1)
         Y_test = batch_slice(Y_data, data_idx, idx, 'ADV_FC', 1, 1)
-        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
+        mae, mse, mape,pred = sess.run([cost_MAE, cost_MSE, cost_MAPE,prediction], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DR: FC_TE_KEEP_PROB, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
 
-        result_alltest.append([str(mae), str(mse), str(mape)])
+        result_alltest.append([str(mae), str(mse), str(mape),str(pred[0])])
 
 
     if not os.path.exists(RESULT_DIR+'alltest/'):
@@ -208,7 +209,7 @@ for train_idx, test_idx in load_Data():
     init()
     sess = tf.Session()
     # 여기서는 모델만 외부 플래그, 그냥 train까지 외부 플래그 해도 됨
-    train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G = model_base(C, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
+    train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G = model_base(C, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_os/train%d" % cr_idx, sess.graph)
@@ -251,7 +252,7 @@ for train_idx, test_idx in load_Data():
     print('Start learning from:', start_from)
 
     # train도 외부에서 FLAG해도됨. 지금은 안에 조건문이 있음
-    train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist,
+    train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist,
           train_D, train_G, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result,
           CURRENT_POINT_DIR, start_from)
 

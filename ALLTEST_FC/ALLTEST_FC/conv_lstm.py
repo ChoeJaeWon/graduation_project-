@@ -15,7 +15,7 @@ def model(C, E, Y, BA):
             layer = tf.reshape(CNN_model(C[idx], BA), [1, -1, TIME_STAMP])
         else:
             layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, -1, TIME_STAMP])], axis=0)
-    layer = multi_LSTM_model_12(layer, E)
+    layer = multi_LSTM_model(layer, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
@@ -25,12 +25,13 @@ def model(C, E, Y, BA):
     with tf.control_dependencies(update_ops):
         optimal = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost_MSE)
 
-    return cost_MAE, cost_MSE, cost_MAPE, optimal
+    return cost_MAE, cost_MSE, cost_MAPE, optimal, layer
 
 #training 해준다.
-def train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,  cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
+    min_mape = 100.0
     for _ in range(start_from):
         np.random.shuffle(train_idx)
     global_step_tr = 0
@@ -69,11 +70,12 @@ def train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,  cost_MAE_hist, 
 
             global_step_te=test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
 
-        if ALL_TEST_SWITCH:
-            if (OS_OR_EXO and CONVLSTM_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and CONVLSTM_EXO_ALLTEST[cr_idx] == tr_idx):
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
-                return 0
+        # All test 해줌
+        if ALL_TEST_SWITCH and test_result[tr_idx][2] < min_mape:
+            print("alltest")
+            min_mape = test_result[tr_idx][2]
+            ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
+
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
@@ -100,7 +102,7 @@ def test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, c
     return global_step_te
 
 #batch slice부분 모델마다 다르게 해줘야함.(각 모델의test참고)
-def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, data_idx, sess, cr_idx, trainORtest):
     result_alltest = []
 
     file_name = 'CONVLSTM'
@@ -109,9 +111,9 @@ def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
         C_test = batch_slice(C_data, data_idx, idx, 'CONV', CELL_SIZE, 1)
         E_test = batch_slice(E_data, data_idx, idx, 'LSTM', 1, 1)
         Y_test = batch_slice(Y_data, data_idx, idx, 'LSTMY', 1, 1)
-        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False})
+        mae, mse, mape, pred = sess.run([cost_MAE, cost_MSE, cost_MAPE, prediction], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False})
 
-        result_alltest.append([str(mae), str(mse), str(mape)])
+        result_alltest.append([str(mae), str(mse), str(mape), str(pred[0][0])])
 
 
     if not os.path.exists(RESULT_DIR+'alltest/'):
@@ -151,7 +153,7 @@ for train_idx, test_idx in load_Data():
 
     init()
     sess = tf.Session()
-    cost_MAE, cost_MSE, cost_MAPE, optimal = model(C, E, Y, BA)
+    cost_MAE, cost_MSE, cost_MAPE, optimal, prediction = model(C, E, Y, BA)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "CONV_LSTM_OS_" + str(cr_idx) + "/"
         ADV_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
@@ -186,7 +188,7 @@ for train_idx, test_idx in load_Data():
     # train my model
     print('Start learning from:', start_from)
 
-    train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result,  CURRENT_POINT_DIR, start_from)
+    train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, optimal, train_idx, test_idx, cr_idx, writer_train, writer_test, train_result, test_result,  CURRENT_POINT_DIR, start_from)
 
     tf.reset_default_graph()
 

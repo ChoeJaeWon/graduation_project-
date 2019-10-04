@@ -46,12 +46,15 @@ def model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR):
     with tf.control_dependencies(G_update_ops):
         train_G = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss_G, var_list=[vars_G ,lstm_weights, lstm_biases, conv_weights, convfc_weights])
 
-    return train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G#, train_G_MSE
+    layer = tf.transpose(layer, perm=[1, 0])
+
+    return train_MSE, cost_MAE, cost_MSE, cost_MAPE, layer[TIME_STAMP-1], train_D, train_G, loss_G#, train_G_MSE
 
 #training 해준다.
-def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
+def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result, CURRENT_POINT_DIR, start_from):
     BATCH_NUM = int(len(train_idx) / BATCH_SIZE)
     print('BATCH_NUM: %d' % BATCH_NUM)
+    min_mape = 100.0
     for _ in range(start_from):
         np.random.shuffle(train_idx)
     global_step_tr = 0
@@ -94,11 +97,11 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MA
 
             global_step_te = test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
         # All test 해줌
-        if ALL_TEST_SWITCH:
-            if (OS_OR_EXO and ADV_CONVLSTM_OS_ALLTEST[cr_idx] == tr_idx) or ((not OS_OR_EXO) and ADV_CONVLSTM_EXO_ALLTEST[cr_idx] == tr_idx):
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, train_idx, sess, cr_idx, 'train')
-                ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, test_idx, sess, cr_idx, 'test')
-                return 0
+        if ALL_TEST_SWITCH and test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM - 1][2] < min_mape:
+            print("alltest")
+            min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM - 1][2]
+            ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
+
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
 
@@ -125,7 +128,7 @@ def test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE
     print("Test Cost(%d) %d: MAE(%lf) MSE(%lf) MAPE(%lf)" % (cr_idx, tr_idx, mae , mse , mape))
     return global_step_te
 
-def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, sess, cr_idx, trainORtest):
+def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, data_idx, sess, cr_idx, trainORtest):
     result_alltest = []
 
     file_name = 'ADV_CONVLSTM'
@@ -134,9 +137,9 @@ def ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, data_idx, ses
         C_test = batch_slice(C_data, data_idx, idx, 'CONV', CELL_SIZE, 1)
         E_test = batch_slice(E_data, data_idx, idx, 'LSTM', 1, 1)
         Y_test = batch_slice(Y_data, data_idx, idx, 'ADV_FC', 1, 1)
-        mae, mse, mape = sess.run([cost_MAE, cost_MSE, cost_MAPE], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
+        mae, mse, mape, pred = sess.run([cost_MAE, cost_MSE, cost_MAPE,prediction], feed_dict={C:C_test, E:E_test, Y:Y_test, BA: False, DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
 
-        result_alltest.append([str(mae), str(mse), str(mape)])
+        result_alltest.append([str(mae), str(mse), str(mape), str(pred[0])])
 
 
     if not os.path.exists(RESULT_DIR+'alltest/'):
@@ -189,7 +192,7 @@ for train_idx, test_idx in load_Data():
 
     init()
     sess = tf.Session()
-    train_MSE, cost_MAE, cost_MSE, cost_MAPE, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
+    train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/train%d" % cr_idx, sess.graph)
@@ -230,7 +233,7 @@ for train_idx, test_idx in load_Data():
     # train my model
     print('Start learning from:', start_from)
 
-    train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
+    train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
 
     tf.reset_default_graph()
 

@@ -49,7 +49,7 @@ random.seed(777)
 
 #File name
 FILEX_SPEED = '../Data/Speed/x_data_2016204_5min_60min_60min_only_speed.csv' #speed만 잘라낸 파일 이름(X data)
-FILEX_EXO = '../Data/ExogenousTime/ExogenousD_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
+FILEX_EXO = '../Data/ExogenousTime/ExogenousTime_data_2016204_5min_60min_60min_8.csv' #exogenous(data 8)만 잘라낸 파일 이름(X data)
 FILEX_CONV = '../Data/Convolution/x_data_2016204_5min_60min_60min_only_speed.csv' #preprocessing한 conv data 파일 이름(X data)
 FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파일 이름(Y data)
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
@@ -65,7 +65,7 @@ PHASE2_EPOCH = 20
 #각 CV당 최저점의 index
 #naive excel에서 검색하여 -1 해줌(excel은 index 1부터 시작함)
 #adv excel에서 검색한 값에 optimized epoch 더해줌(1안뺌)
-ALL_TEST_SWITCH = False
+ALL_TEST_SWITCH = True
 FC_OS_ALLTEST = [133, 89, 184, 106, 163]
 CONV_OS_ALLTEST = [60, 160, 45, 103, 188]
 LSTM_OS_ALLTEST = [] #4CV만 돌았음
@@ -100,11 +100,11 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 11 #traing 회수 [default 1000]
+TRAIN_NUM = 1#traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
-CROSS_ITERATION_NUM = 5 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
+CROSS_ITERATION_NUM = 1 #cross validation의 반복수 (CROSS_NUM보다 작아야하며 독립적으로 생각됨)
 BATCH_SIZE =  300 #1 epoch 당 batch의 개수 [default 300]
 TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)

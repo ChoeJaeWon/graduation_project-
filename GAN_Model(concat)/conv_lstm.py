@@ -15,7 +15,7 @@ def model(C, E, Y, BA):
             layer = tf.reshape(CNN_model(C[idx], BA), [1, -1, TIME_STAMP])
         else:
             layer = tf.concat([layer, tf.reshape(CNN_model(C[idx], BA, True), [1, -1, TIME_STAMP])], axis=0)
-    layer = multi_LSTM_model_12(layer, E)
+    layer = multi_LSTM_model(layer, E)
 
     cost_MAE = MAE(Y, layer)
     cost_MSE = MSE(Y, layer)
