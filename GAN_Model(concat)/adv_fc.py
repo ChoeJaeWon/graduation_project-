@@ -20,20 +20,19 @@ def model_base(S, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR):
     # 3차원 오차, MAE, MAPE는 Train 에서는 필요 없음
     # cost_MAE = MAE(Y, layer)
     train_MSE = MSE(Y, layer)
+
     # cost_MAPE = MAPE(Y, layer)
-    cost_MAE = MAE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1]) #실제로는 직후부터 60분 뒤 까지의 예측이므로
-    cost_MSE = MSE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
-    cost_MAPE = MAPE(Y[TIME_STAMP - 1], layer[TIME_STAMP - 1])
+    cost_MAE = MAE(Y[11], layer[11]) #실제로는 직후부터 60분 뒤 까지의 예측이므로
+    cost_MSE = MSE(Y[11], layer[11])
+    cost_MAPE = MAPE(Y[11], layer[11])
 
     layer = tf.transpose(layer, perm=[1, 0])  # lstm에 unstack 이 있다면, 여기서는 transpose를 해주는 편이 위의 계산할 때 편할 듯
 
     Y = tf.transpose(Y, perm=[1, 0])  # y는 처음부터 잘 만들면 transpose할 필요 없지만, x랑 같은 batchslice를 하게 해주려면 이렇게 하는 편이 나음.
 
     #Pix2Pix
-    print('test')
-    print(S[TIME_STAMP-1])
-    print(S[TIME_STAMP - 1][24:36])
-    DE = tf.concat([E[TIME_STAMP - 1], S[TIME_STAMP - 1][24:36]], axis=1)
+
+    DE = tf.concat([E[11], S[11,:,24:36]], axis=1)
 
 
     loss_D = -tf.reduce_mean(

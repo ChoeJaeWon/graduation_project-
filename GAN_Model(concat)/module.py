@@ -85,7 +85,7 @@ ADV_LSTM_EXO_ALLTEST = [41+OPTIMIZED_EPOCH_LSTM, 83+OPTIMIZED_EPOCH_LSTM, 41+OPT
 ADV_CONVLSTM_EXO_ALLTEST = [44+OPTIMIZED_EPOCH_CONV_LSTM, 61+OPTIMIZED_EPOCH_CONV_LSTM,	35+OPTIMIZED_EPOCH_CONV_LSTM, 32+OPTIMIZED_EPOCH_CONV_LSTM, 75+OPTIMIZED_EPOCH_CONV_LSTM]
 
 #FLAG
-USE_LOAD = False
+USE_LOAD = True
 RESTORE_FLAG = USE_LOAD #weight 불러오기 여부 [default False]
 RESTORE_GENERATOR_FLAG = USE_LOAD #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False]
 MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
@@ -100,7 +100,7 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 200 #traing 회수 [default 1000]
+TRAIN_NUM = 130 #traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -167,7 +167,7 @@ DISCONV_LAST_LAYER_SIZE = 8 #필터 거치고
 TEST_CASE_NUM = 20
 TEST_RATIO = 10
 TIME_INTERVAL = 24
-DATA_SIZE = 35400-TIME_STAMP
+DATA_SIZE = 35400-12
 
 fc_weights = [] #fc weight들의 크기는 layer의 길이에 따라 결정된다.
 discriminator_weights = [] #여기서 부터는 E가 들어가는 지점
@@ -198,7 +198,7 @@ def init():
     # conv weight 초기화
     for layer_idx in range(1,CONV_LAYER_NUM+1):
         conv_weights.append(init_weights([FILTER_SIZE_SPATIAL[layer_idx-1], FILTER_SIZE_TEMPORAL[layer_idx-1], CHANNEL_NUM[layer_idx-1], CHANNEL_NUM[layer_idx]]))
-    convfc_weights.append(init_weights([LAST_LAYER_SIZE*CHANNEL_NUM[CONV_LAYER_NUM],TIME_STAMP]))
+    convfc_weights.append(init_weights([LAST_LAYER_SIZE*CHANNEL_NUM[CONV_LAYER_NUM],12]))
 
     # lstm weight 초기화
     lstm_weights.append(init_weights([HIDDEN_NUM[-1], 1]))
@@ -211,7 +211,7 @@ def init():
              DISCONV_CHANNEL_NUM[layer_idx - 1],
              DISCONV_CHANNEL_NUM[layer_idx]])) #마지막 채널은 conv 로 부터
     discriminator_convfc_weights.append(
-        init_weights([DISCONV_LAST_LAYER_SIZE * DISCONV_CHANNEL_NUM[DISCONV_CONV_LAYER_NUM], TIME_STAMP]))  # 마지막 layer (1층)
+        init_weights([DISCONV_LAST_LAYER_SIZE * DISCONV_CHANNEL_NUM[DISCONV_CONV_LAYER_NUM], 12]))  # 마지막 layer (1층)
 
     # discriminator weight 초기화
     for layer_idx in range(1, DISCRIMINATOR_LAYER_NUM+1):
@@ -464,10 +464,10 @@ def batch_slice(data, data_idx, batch_idx, slice_type, cell_size=1, BATCH_SIZE =
         for idx in range(batch_idx * BATCH_SIZE, (batch_idx + 1) * BATCH_SIZE):
             start_idx = data_idx[idx]
             if idx == batch_idx * BATCH_SIZE:
-                slice_data = data[start_idx: start_idx + TIME_STAMP].reshape(TIME_STAMP, 1,
+                slice_data = data[start_idx: start_idx + 12].reshape(12, 1,
                                                                             -1)  # 마지막이 -1인 이유(speed의 경우 12 이고 exogenous의 경우 71이기 때문)
             else:
-                slice_data = np.append(slice_data, data[start_idx: start_idx + TIME_STAMP].reshape(TIME_STAMP, 1, -1),
+                slice_data = np.append(slice_data, data[start_idx: start_idx + 12].reshape(12, 1, -1),
                                        axis=1) #[TIME_STAMP, BATCH_SIZE, -1]  LSTM의  CELL STATE 와 다름
 
 
