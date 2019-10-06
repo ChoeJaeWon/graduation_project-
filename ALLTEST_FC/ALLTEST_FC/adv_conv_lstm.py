@@ -91,6 +91,7 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, predict
                 sess.run(last_epoch.assign(tr_idx + 1))
                 if (tr_idx) % SAVE_INTERVAL == 0:
                     print("Saving network...")
+                    saver = tf.train.Saver()
                     if not os.path.exists(CURRENT_POINT_DIR):
                         os.makedirs(CURRENT_POINT_DIR)
                     saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
@@ -101,6 +102,7 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, predict
             print("alltest")
             min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM - 1][2]
             ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
+
 
         #cross validation의 train_idx를 shuffle해준다.
         np.random.shuffle(train_idx)
