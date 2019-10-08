@@ -217,10 +217,12 @@ for train_idx, test_idx in load_Data():
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G = model_base(C, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_" + str(cr_idx) + "/"
+        WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_WHOLE_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_os/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_os/test%d" % cr_idx, sess.graph)
     else:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_EXO_" + str(cr_idx) + "/"
+        WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_EXO_WHOLE_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_exo/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_exo/test%d" % cr_idx, sess.graph)
 

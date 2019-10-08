@@ -202,7 +202,7 @@ for train_idx, test_idx in load_Data():
             writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/test%d" % cr_idx, sess.graph)
         else:
             CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_" + str(cr_idx) + "/"
-            WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_WHOLE" + str(cr_idx) + "/"
+            WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_WHOLE_" + str(cr_idx) + "/"
             writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/train%d" % cr_idx, sess.graph)
             writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/test%d" % cr_idx, sess.graph)
 
