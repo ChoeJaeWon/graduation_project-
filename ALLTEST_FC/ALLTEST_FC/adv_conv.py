@@ -108,9 +108,9 @@ def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cos
                 if (tr_idx) % SAVE_INTERVAL == 0:
                     print("Saving network...")
                     saver = tf.train.Saver()
-                    if not os.path.exists(CURRENT_POINT_DIR):
-                        os.makedirs(CURRENT_POINT_DIR)
-                    saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+                    if not os.path.exists(WHOLE_POINT_DIR):
+                        os.makedirs(WHOLE_POINT_DIR)
+                    saver.save(sess, WHOLE_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
             global_step_te = test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
         # All test 해줌
