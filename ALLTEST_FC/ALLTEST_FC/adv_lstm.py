@@ -132,7 +132,7 @@ def ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, d
 
         mae, mse, mape,pred = sess.run([cost_MAE, cost_MSE, cost_MAPE,prediction], feed_dict={S:S_test, E:E_test, Y:Y_test,DISCRIMINATOR_BA: False, DISCRIMINATOR_DR:DISCRIMINATOR_TE_KEEP_PROB})
 
-        result_alltest.append([str(mae), str(mse), str(mape),str[pred[0]]])
+        result_alltest.append([str(mae), str(mse), str(mape),str(pred[0])])
 
 
     if not os.path.exists(RESULT_DIR+'alltest/'):

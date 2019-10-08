@@ -65,7 +65,7 @@ PHASE2_EPOCH = 20
 #각 CV당 최저점의 index
 #naive excel에서 검색하여 -1 해줌(excel은 index 1부터 시작함)
 #adv excel에서 검색한 값에 optimized epoch 더해줌(1안뺌)
-ALL_TEST_SWITCH = False
+ALL_TEST_SWITCH = True
 FC_OS_ALLTEST = [133, 89, 184, 106, 163]
 CONV_OS_ALLTEST = [60, 160, 45, 103, 188]
 LSTM_OS_ALLTEST = [] #4CV만 돌았음
@@ -86,9 +86,9 @@ ADV_CONVLSTM_EXO_ALLTEST = [44+OPTIMIZED_EPOCH_CONV_LSTM, 61+OPTIMIZED_EPOCH_CON
 
 #FLAG
 #USE_LOAD = True
-RESTORE_FLAG = True #weight 불러오기 여부 [default False]  두개 나눠져야함. 전체 불러올때는 restore만 true로 generator는 false로
+RESTORE_FLAG = False #weight 불러오기 여부 [default False]  두개 나눠져야함. 전체 불러올때는 restore만 true로 generator는 false로
 RESTORE_GENERATOR_FLAG = False #Generator weight 불러오기 여부 [RESTORE_FLAG]가 False 이면 항상 False[default False] 한번 저장된 후에는 False로 무조건 바꿔야 합니다.
-MASTER_SAVE_FLAG = True #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
+MASTER_SAVE_FLAG = False #[WARNING] 저장이 되지 않습니다. (adv 모델에 한해 적용)
 
 #Fix value(Week Cross Validation)
 DAY = [-1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -327,7 +327,7 @@ def LSTM_model(S, E, is_reuse=False):
         #X,E는 같은 시간 끼리 합쳐줌
         x = tf.unstack(tf.concat([S, E], axis=2), axis=0)
 
-        lstm_cell = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM, forget_bias=FORGET_BIAS)
+        lstm_cell = tf.nn.rnn_cell.LSTMCell(num_units=HIDDEN_NUM[0], forget_bias=FORGET_BIAS)
         #lstm_cell = tf.contrib.rnn.BasicLSTMCell(HIDDEN_NUM, forget_bias=FORGET_BIAS)
 
         outputs, _ = tf.nn.static_rnn(cell=lstm_cell, inputs=x, dtype= tf.float32 )
