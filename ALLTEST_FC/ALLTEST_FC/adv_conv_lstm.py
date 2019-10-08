@@ -71,9 +71,9 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, predict
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC')
 
 
-            if tr_idx > OPTIMIZED_EPOCH_CONV_LSTM + PHASE1_EPOCH:
+            if tr_idx > OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] + PHASE1_EPOCH:
                 _ = sess.run([train_D], feed_dict={ C:C_train, E:E_train, Y: Y_train, BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
-            if (tr_idx <= OPTIMIZED_EPOCH_CONV_LSTM + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_CONV_LSTM + PHASE1_EPOCH + PHASE2_EPOCH):
+            if (tr_idx <= OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] + PHASE1_EPOCH + PHASE2_EPOCH):
                 cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, train_G, loss_G], feed_dict={C:C_train, E:E_train, Y: Y_train,BA: True,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB })
                 epoch_mse_cost += cost_MSE_val
                 epoch_mape_cost += cost_MAPE_val
@@ -92,15 +92,15 @@ def train(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, predict
                 if (tr_idx) % SAVE_INTERVAL == 0:
                     print("Saving network...")
                     saver = tf.train.Saver()
-                    if not os.path.exists(CURRENT_POINT_DIR):
-                        os.makedirs(CURRENT_POINT_DIR)
-                    saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+                    if not os.path.exists(WHOLE_POINT_DIR):
+                        os.makedirs(WHOLE_POINT_DIR)
+                    saver.save(sess, WHOLE_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
             global_step_te = test(S_data, C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
         # All test 해줌
-        if ALL_TEST_SWITCH and test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM - 1][2] < min_mape:
+        if ALL_TEST_SWITCH and test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] - 1][2] < min_mape:
             print("alltest")
-            min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM - 1][2]
+            min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] - 1][2]
             ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
 
 
@@ -177,69 +177,71 @@ if FILEX_EXO.find("Zero") < 0:
     OS_OR_EXO = False
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
+    if cr_idx >= 2:
+        train_result = []
+        test_result = []
 
-    train_result = []
-    test_result = []
-
-    C = tf.placeholder("float32", [CELL_SIZE, None, SPARTIAL_NUM, TEMPORAL_NUM, 1])  # cell_size, batch_size
-    E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM])  # cell_size, batch_size
-    Y = tf.placeholder("float32", [CELL_SIZE, None, 1])
-    BA = tf.placeholder(tf.bool)
-    DISCRIMINATOR_BA = tf.placeholder(tf.bool)
-    DISCRIMINATOR_DR = tf.placeholder(tf.float32)
-    if RESTORE_GENERATOR_FLAG:
-        last_epoch = tf.Variable(OPTIMIZED_EPOCH_CONV_LSTM +1, name=LAST_EPOCH_NAME)
-    else:
-        last_epoch = tf.Variable(0, name=LAST_EPOCH_NAME)
-
-    init()
-    sess = tf.Session()
-    train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
-    if FILEX_EXO.find("Zero") >= 0:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
-        writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/train%d" % cr_idx, sess.graph)
-        writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/test%d" % cr_idx, sess.graph)
-    else:
-        CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_" + str(cr_idx) + "/"
-        writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/train%d" % cr_idx, sess.graph)
-        writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/test%d" % cr_idx, sess.graph)
-
-    train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
-    cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
-    cost_MSE_hist = tf.summary.scalar('cost_MSE', cost_MSE)
-    cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
-    sess.run(tf.global_variables_initializer())
-
-    # Saver and Restore
-    if RESTORE_GENERATOR_FLAG:
-        conv_lstm_batch_norm_weights = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                                  scope='generator_conv') +  tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                                  scope='generator_lstm')
-        variables_to_restore = lstm_weights + lstm_biases +  conv_weights + convfc_weights + conv_lstm_batch_norm_weights
-        saver = tf.train.Saver(variables_to_restore)
-    else:
-        saver = tf.train.Saver()
-    checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
-
-    if RESTORE_FLAG:
-        if checkpoint and checkpoint.model_checkpoint_path:
-            try:
-                saver.restore(sess, checkpoint.model_checkpoint_path)
-                print("Successfully loaded:", checkpoint.model_checkpoint_path)
-            except:
-                print("Error on loading old network weights")
+        C = tf.placeholder("float32", [CELL_SIZE, None, SPARTIAL_NUM, TEMPORAL_NUM, 1])  # cell_size, batch_size
+        E = tf.placeholder("float32", [CELL_SIZE, None, EXOGENOUS_NUM])  # cell_size, batch_size
+        Y = tf.placeholder("float32", [CELL_SIZE, None, 1])
+        BA = tf.placeholder(tf.bool)
+        DISCRIMINATOR_BA = tf.placeholder(tf.bool)
+        DISCRIMINATOR_DR = tf.placeholder(tf.float32)
+        if RESTORE_GENERATOR_FLAG:
+            last_epoch = tf.Variable(OPTIMIZED_EPOCH_CONV_LSTM[cr_idx] +1, name=LAST_EPOCH_NAME)
         else:
-            print("Could not find old network weights")
+            last_epoch = tf.Variable(0, name=LAST_EPOCH_NAME)
 
-    start_from = sess.run(last_epoch)
-    # train my model
-    print('Start learning from:', start_from)
+        init()
+        sess = tf.Session()
+        train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G  = model_base(C, E, Y, DISCRIMINATOR_BA,  DISCRIMINATOR_DR)
+        if FILEX_EXO.find("Zero") >= 0:
+            CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_" + str(cr_idx) + "/"
+            WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_OS_WHOLE_" + str(cr_idx) + "/"
+            writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/train%d" % cr_idx, sess.graph)
+            writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_os/test%d" % cr_idx, sess.graph)
+        else:
+            CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_" + str(cr_idx) + "/"
+            WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_LSTM_EXO_WHOLE" + str(cr_idx) + "/"
+            writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/train%d" % cr_idx, sess.graph)
+            writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_lstm_exo/test%d" % cr_idx, sess.graph)
 
-    train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
+        train_MSE_hist = tf.summary.scalar('train_MSE', train_MSE)
+        cost_MAE_hist = tf.summary.scalar('cost_MAE', cost_MAE)
+        cost_MSE_hist = tf.summary.scalar('cost_MSE', cost_MSE)
+        cost_MAPE_hist = tf.summary.scalar('cost_MAPE', cost_MAPE)
+        sess.run(tf.global_variables_initializer())
 
-    tf.reset_default_graph()
+        # Saver and Restore
+        if RESTORE_GENERATOR_FLAG:
+            conv_lstm_batch_norm_weights = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                                      scope='generator_conv') +  tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                                      scope='generator_lstm')
+            variables_to_restore = lstm_weights + lstm_biases +  conv_weights + convfc_weights + conv_lstm_batch_norm_weights
+            saver = tf.train.Saver(variables_to_restore)
+        else:
+            saver = tf.train.Saver()
+        checkpoint = tf.train.get_checkpoint_state(CURRENT_POINT_DIR)
 
-    output_data(train_result, test_result, 'adv_conv_lstm'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
+        if RESTORE_FLAG:
+            if checkpoint and checkpoint.model_checkpoint_path:
+                try:
+                    saver.restore(sess, checkpoint.model_checkpoint_path)
+                    print("Successfully loaded:", checkpoint.model_checkpoint_path)
+                except:
+                    print("Error on loading old network weights")
+            else:
+                print("Could not find old network weights")
+
+        start_from = sess.run(last_epoch)
+        # train my model
+        print('Start learning from:', start_from)
+
+        train(S_data,C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, train_D, train_G, train_idx, test_idx, cr_idx,  writer_train, writer_test, train_result, test_result , CURRENT_POINT_DIR, start_from)
+
+        tf.reset_default_graph()
+
+        output_data(train_result, test_result, 'adv_conv_lstm'+ "_" + str(DISCRIMINATOR_LAYER_NUM) + "_" + str(LEARNING_RATE)[2:]+"_" + format(DISCRIMINATOR_ALPHA, 'f')[2:] + "_" + str(PHASE1_EPOCH) + "_"+ str(PHASE2_EPOCH)+"_"+ str(TRAIN_NUM)+ "_" , cr_idx, _result_dir)
 
     cr_idx=cr_idx+1
 

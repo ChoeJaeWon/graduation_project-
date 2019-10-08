@@ -62,7 +62,7 @@ def train(C_data,E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cost
                 if not os.path.exists(CURRENT_POINT_DIR):
                     os.makedirs(CURRENT_POINT_DIR)
                 saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-                if tr_idx == OPTIMIZED_EPOCH_CONV_LSTM:
+                if tr_idx == OPTIMIZED_EPOCH_CONV_LSTM[cr_idx]:
                     print("Saving network for ADV...")
                     if not os.path.exists(ADV_POINT_DIR):
                         os.makedirs(ADV_POINT_DIR)
