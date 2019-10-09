@@ -54,10 +54,11 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cos
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
             sess.run(last_epoch.assign(tr_idx + 1))
             if tr_idx % SAVE_INTERVAL == 0:
-                print("Saving network...")
-                if not os.path.exists(CURRENT_POINT_DIR):
-                    os.makedirs(CURRENT_POINT_DIR)
-                saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+                if not ALL_TEST_SWITCH:
+                    print("Saving network...")
+                    if not os.path.exists(CURRENT_POINT_DIR):
+                        os.makedirs(CURRENT_POINT_DIR)
+                    saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
                 if tr_idx == OPTIMIZED_EPOCH_FC:
                     print("Saving network for ADV...")
                     if not os.path.exists(ADV_POINT_DIR):
@@ -67,6 +68,11 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cos
 
         # All test 해줌
         if ALL_TEST_SWITCH and test_result[tr_idx][2]<min_mape:
+            sess.run(last_epoch.assign(tr_idx + 1))
+            print("Saving network...")
+            if not os.path.exists(CURRENT_POINT_DIR):
+                os.makedirs(CURRENT_POINT_DIR)
+            saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
             print("alltest")
             min_mape = test_result[tr_idx][2]
             ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0,35350)]), sess, cr_idx, 'all')

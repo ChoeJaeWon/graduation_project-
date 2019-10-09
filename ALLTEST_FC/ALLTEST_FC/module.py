@@ -55,7 +55,7 @@ FILEY = '../Data/Y/y_data_2016204_5min_60min_60min.csv' #beta분 후 speed 파�
 CHECK_POINT_DIR = './save/' #각 weight save 파일의 경로입니다.
 RESULT_DIR = './Result/'
 LAST_EPOCH_NAME = 'last_epoch' #불러온 에폭에 대한 이름입니다.
-OPTIMIZED_EPOCH_FC = 5 #SAVE_INTERVEL 의 배수여야 합니다.
+OPTIMIZED_EPOCH_FC = 35 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_CONV = 30 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_LSTM = 30 #SAVE_INTERVEL 의 배수여야 합니다.
 OPTIMIZED_EPOCH_CONV_LSTM = [15,10,20,10,10] #SAVE_INTERVEL 의 배수여야 합니다.15
@@ -100,7 +100,7 @@ WEEK_NUM = 4
 INTERVAL = 24 #adv conv lstm에서 overlap방지
 
 #variable
-TRAIN_NUM = 100#traing 회수 [default 1000]
+TRAIN_NUM = 200#traing 회수 [default 1000]
 SPEED_MAX = 98 #data내의 최고 속도 [default 100]
 SPEED_MIN = 3 #data내의 최저 속도 [default 0]
 CROSS_NUM = 5 #cross validation의 spilit 수
@@ -110,7 +110,7 @@ TEST_BATCH_SIZE = 147
 LEARNING_RATE = 0.001 #learning rate(모든 model, gan은 *2)
 TRAIN_PRINT_INTERVAL = 1 #train 에서 mse값 출력 간격
 TEST_PRINT_INTERVAL = 1 #test 에서 mae, mse, mape값 출력 간격
-SAVE_INTERVAL = 1
+SAVE_INTERVAL = 5
 
 #Hyper Parameter(FC)
 FC_LAYER_NUM = 5 #fc layer의 깊이 [default 3]
@@ -151,7 +151,7 @@ DISCRIMINATOR_BATCH_NORM = True
 DISCRIMINATOR_DROPOUT = True
 DISCRIMINATOR_TR_KEEP_PROB = 0.8 #training 에서 dropout 비율
 DISCRIMINATOR_TE_KEEP_PROB = 1.0 #testing 에서 dropout 비율
-DISCRIMINATOR_ALPHA = 0.0001 #MSE 앞에 붙는 람다 term
+DISCRIMINATOR_ALPHA = 0.00008 #MSE 앞에 붙는 람다 term
 
 DISCONV_POOLING = False #pooling을 사용할 것인지 [default True]
 DISCONV_CONV_BATCH_NORM = True #conv 에서 batch normalization 을 사용할것인지 [default True]
