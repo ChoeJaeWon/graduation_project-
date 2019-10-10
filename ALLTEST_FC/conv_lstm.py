@@ -148,7 +148,7 @@ if FILEX_EXO.find("Zero") < 0:
 cr_idx = 0
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
-    if cr_idx >= 2:
+    if cr_idx >= 0:
         train_result = []
         test_result = []
         C = tf.placeholder("float32", [CELL_SIZE, None, SPARTIAL_NUM, TEMPORAL_NUM, 1]) #cell_size, batch_size

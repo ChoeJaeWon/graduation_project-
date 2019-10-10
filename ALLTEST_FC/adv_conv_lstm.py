@@ -184,7 +184,7 @@ if FILEX_EXO.find("Zero") < 0:
     OS_OR_EXO = False
 for train_idx, test_idx in load_Data():
     print('CROSS VALIDATION: %d' % cr_idx)
-    if cr_idx >= 2:
+    if cr_idx >= 0:
         train_result = []
         test_result = []
 
