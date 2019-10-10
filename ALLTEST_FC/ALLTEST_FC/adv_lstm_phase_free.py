@@ -63,14 +63,14 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost
             E_train = batch_slice(E_data, train_idx, ba_idx, 'LSTM', 1)
             Y_train = batch_slice(Y_data, train_idx, ba_idx, 'ADV_FC', 1)
 
-            if tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH:
-                _ = sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
-            if (tr_idx <= OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH) | (tr_idx > OPTIMIZED_EPOCH_LSTM + PHASE1_EPOCH + PHASE2_EPOCH):
-                cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, train_G, loss_G], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
-                epoch_loss += loss
-                epoch_mse_cost += cost_MSE_val
-                epoch_mape_cost += cost_MAPE_val
-                writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
+
+            _ = sess.run([train_D], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+
+            cost_MSE_val, cost_MAPE_val, cost_MSE_hist_val, _, loss= sess.run([cost_MSE, cost_MAPE, cost_MSE_hist, train_G, loss_G], feed_dict={S:S_train, E:E_train, Y: Y_train ,DISCRIMINATOR_BA:True, DISCRIMINATOR_DR: DISCRIMINATOR_TR_KEEP_PROB})
+            epoch_loss += loss
+            epoch_mse_cost += cost_MSE_val
+            epoch_mape_cost += cost_MAPE_val
+            writer_train.add_summary(cost_MSE_hist_val, global_step_tr)
             global_step_tr += 1
 
         # 설정 interval당 train과 test 값을 출력해준다.
@@ -80,7 +80,7 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost
             print("G_loss %d: %lf" % (tr_idx, epoch_loss / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
             if MASTER_SAVE_FLAG and (not ALL_TEST_SWITCH):
-                sess.run(last_epoch.assign(tr_idx+1))
+                sess.run(last_epoch.assign(tr_idx + 1))
                 if (tr_idx) % SAVE_INTERVAL == 0:
                     print("Saving network...")
                     saver = tf.train.Saver()
@@ -99,7 +99,6 @@ def train(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE,prediction, cost
                 if not os.path.exists(WHOLE_POINT_DIR):
                     os.makedirs(WHOLE_POINT_DIR)
                 saver.save(sess, WHOLE_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
-            print("alltest")
             min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_LSTM - 1][2]
             ALLTEST(S_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction,np.array([i for i in range(0, 35350)]),  sess, cr_idx, 'all')
         #cross validation의 train_idx를 shuffle해준다.

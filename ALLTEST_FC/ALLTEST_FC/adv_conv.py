@@ -103,18 +103,25 @@ def train(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, cos
             print("Train Cost %d: %lf %lf" % (tr_idx, epoch_mse_cost / BATCH_NUM, epoch_mape_cost/BATCH_NUM))
             print("Train loss %d: %lf" % (tr_idx, epoch_loss / BATCH_NUM))
         if (tr_idx+1) % TEST_PRINT_INTERVAL == 0:
-            if MASTER_SAVE_FLAG:
+            if MASTER_SAVE_FLAG and (not ALL_TEST_SWITCH):
                 sess.run(last_epoch.assign(tr_idx + 1))
                 if (tr_idx) % SAVE_INTERVAL == 0:
                     print("Saving network...")
                     saver = tf.train.Saver()
-                    if not os.path.exists(CURRENT_POINT_DIR):
-                        os.makedirs(CURRENT_POINT_DIR)
-                    saver.save(sess, CURRENT_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
+                    if not os.path.exists(WHOLE_POINT_DIR):
+                        os.makedirs(WHOLE_POINT_DIR)
+                    saver.save(sess, WHOLE_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
 
             global_step_te = test(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, cost_MAE_hist, cost_MSE_hist, cost_MAPE_hist, test_idx, tr_idx, global_step_te, cr_idx, writer_test, test_result)
         # All test 해줌
         if ALL_TEST_SWITCH and test_result[tr_idx - OPTIMIZED_EPOCH_CONV - 1][2] < min_mape:
+            if MASTER_SAVE_FLAG:
+                sess.run(last_epoch.assign(tr_idx + 1))
+                print("Saving network...")
+                saver = tf.train.Saver()
+                if not os.path.exists(WHOLE_POINT_DIR):
+                    os.makedirs(WHOLE_POINT_DIR)
+                saver.save(sess, WHOLE_POINT_DIR + "/model", global_step=tr_idx, write_meta_graph=False)
             print("alltest")
             min_mape = test_result[tr_idx - OPTIMIZED_EPOCH_CONV - 1][2]
             ALLTEST(C_data, E_data, Y_data, cost_MAE, cost_MSE, cost_MAPE, prediction, np.array([i for i in range(0, 35350)]), sess, cr_idx, 'all')
@@ -217,10 +224,12 @@ for train_idx, test_idx in load_Data():
     train_MSE, cost_MAE, cost_MSE, cost_MAPE, prediction, train_D, train_G, loss_G = model_base(C, E, Y, BA, DR, DISCRIMINATOR_BA, DISCRIMINATOR_DR)
     if FILEX_EXO.find("Zero") >= 0:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_" + str(cr_idx) + "/"
+        WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_OS_WHOLE_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_os/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_os/test%d" % cr_idx, sess.graph)
     else:
         CURRENT_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_EXO_" + str(cr_idx) + "/"
+        WHOLE_POINT_DIR = CHECK_POINT_DIR + "ADV_CONV_EXO_WHOLE_" + str(cr_idx) + "/"
         writer_train = tf.summary.FileWriter("./tensorboard/adv_conv_exo/train%d" % cr_idx, sess.graph)
         writer_test = tf.summary.FileWriter("./tensorboard/adv_conv_exo/test%d" % cr_idx, sess.graph)
 
